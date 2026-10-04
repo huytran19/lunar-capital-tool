@@ -1,4 +1,4 @@
-# Lunar Capital Tool (repo dua-ngong)
+# Lunar Capital Tool (repo lunar-capital-tool, trước đây là dua-ngong)
 
 Game bốc thăm/giveaway chạy trên trình duyệt, dùng cho guild. Toàn bộ nằm trong **một file `index.html`** (HTML + CSS + JS + sprite nhúng base64), không cần build, không phụ thuộc thư viện. Mở trực tiếp bằng trình duyệt là chạy.
 
@@ -68,7 +68,7 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Vòng quay may mắn, Chi
 - Chạy thử từng mode bằng Playwright (viewport 390x844) và chụp màn hình. Máy này không cài Playwright: import từ bản cache `~/.npm/_npx/*/node_modules/playwright/index.mjs` và truyền `executablePath` tới Chromium có sẵn trong `~/Library/Caches/ms-playwright/chromium_headless_shell-*/` (bản đúng phiên bản có thể chưa tải).
 
 ## Deploy
-- Repo public `huytran19/dua-ngong`, GitHub Pages từ branch `main`, thư mục root: https://huytran19.github.io/dua-ngong/
+- Repo public `huytran19/lunar-capital-tool` (đổi tên từ `dua-ngong` ngày 2026-10-04, link /dua-ngong/ cũ đã bỏ), GitHub Pages từ branch `main`, thư mục root: https://huytran19.github.io/lunar-capital-tool/
 - Push lên `main` là Pages tự build lại (khoảng 1 phút).
 - Link riêng từng mode: `/giveaway/` (Đua Ngỗng), `/vong-quay/` (Vòng quay may mắn), `/chia-team/`, `/sinh-ton/`, `/trung-no/`, `/giai-dau/`. `/tranh-pass/` là link cũ, giữ lại để link đã gửi vẫn chạy. Mỗi thư mục chỉ có một `index.html` nhỏ chứa thẻ Open Graph (thẻ xem trước khi dán vào Discord) rồi chuyển về `../?mode=<mode>`. Game đọc `?mode=` lúc mở và cập nhật lại URL khi đổi mode.
 - Ảnh xem trước 1200x630 ở `og/` (`home.jpg` cho trang chính, `<mode>.jpg` cho từng link). Tạo bằng Playwright: chụp khu vực chơi giữa ván rồi ghép với tiêu đề. Đổi giao diện nhiều thì chụp lại.
@@ -77,3 +77,9 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Vòng quay may mắn, Chi
 ## Việc tiếp theo đã bàn
 - Nút gửi kết quả lên Discord qua Webhook (URL webhook chỉ lưu localStorage trên máy host, không ghi vào code). Chỉ chạy được trên bản GitHub Pages.
 - Có thể làm sau: Discord Activity, vé nhiều suất.
+
+## Gift code (`gift-code/`)
+- Trang tra gift code Where Winds Meet, gộp từ repo `wwm-codes` cũ ngày 2026-10-04 (repo cũ giờ chỉ chuyển hướng sang đây). Trang tĩnh riêng, không dính `index.html` chính; nút 🎁 trên thanh trên trỏ tới, trang gift code có link "← Lunar Capital" quay về.
+- Danh sách code ở `gift-code/js/codes-data.js`, lấy từ API `https://codes.yar.gg/api/codes`. `node gift-code/scripts/update-codes.js [--push]` cập nhật file (thêm `--push` thì commit riêng file đó, pull --rebase rồi push).
+- launchd `com.huytran.wwm-codes.update` (~/Library/LaunchAgents) chạy `--push` lúc 12:00 mỗi ngày, log ở `gift-code/logs/` (đã gitignore).
+- Tiến trình "đã dùng" lưu localStorage của trang gift code; cùng origin `huytran19.github.io` nên người dùng cũ vẫn giữ tiến trình.
