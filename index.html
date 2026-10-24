@@ -109,6 +109,27 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 .finish{position:absolute;top:0;bottom:0;width:16px;z-index:1;background:repeating-conic-gradient(#1b1b1b 0 25%,#fff 0 50%) 0 0/16px 16px}
 .deco{position:absolute;font-size:12px;opacity:.8;z-index:0;pointer-events:none}
 .mode-give .gname{right:88%;top:50%;transform:translateY(-50%);font-size:12px;max-width:130px}
+
+/* Dê Leo Núi (mode climb). Nền: ansimuz – Mountain at Dusk (CC0); dê: Sevarihk – Mountain Goat Sprites (CC-BY 4.0) */
+.peak-wrap{position:relative;overflow:hidden;border:3px solid var(--frame);border-radius:16px;background-color:#7d5a8c;
+  background-image:url(sprites/nui-day.png),url(sprites/nui-xa.png),url(sprites/nui-troi.png);
+  background-repeat:repeat-x,repeat-x,no-repeat;background-size:auto 46%,auto 62%,cover;background-position:0 100%,35% 100%,center top;
+  image-rendering:pixelated}
+.peak-box{position:relative}
+.peak-wrap .world{width:100%;z-index:0}
+.alt{position:absolute;left:6px;z-index:2;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.32);padding:0 6px;border-radius:6px;transform:translateY(-50%);white-space:nowrap;pointer-events:none}
+.peak-wrap svg{position:absolute;left:0;top:0;z-index:0}
+.rung{position:absolute;left:0;right:0;bottom:0;height:90px;background:url(sprites/nui-rung.png) repeat-x 0 100%/auto 90px;image-rendering:pixelated;z-index:1;opacity:.9}
+.tuft{position:absolute;font-size:13px;z-index:1;pointer-events:none;transform:translate(-50%,-80%)}
+.summit-sign{position:absolute;z-index:1;transform:translate(-50%,-100%);font-size:12px;font-weight:800;color:#1b1b1b;background:#F5E6B8;border:2px solid #6B4A2B;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.gspr{display:block;width:100%;height:100%;background-image:url(sprites/de-nui.png);background-repeat:no-repeat;image-rendering:pixelated}
+.mode-climb .goose{will-change:transform}
+.mode-climb .goose.wild{opacity:.88}
+.mode-climb .gname{left:50%;top:86%;transform:translateX(-50%);font-size:11px;max-width:96px;border-bottom:2px solid var(--c,#fff);line-height:1.15}
+.mode-climb .badge{left:50%;top:auto;bottom:18%;transform:translateX(-50%)}
+.mode-climb .crown{left:50%;top:0;transform:translateX(-50%)}
+.mode-climb .bubble{bottom:72%;left:70%}
+.mode-climb .bubble.left{left:auto;right:70%}
 .countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:9;pointer-events:none}
 .countdown span{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:84px;white-space:nowrap;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.35);opacity:0}
 .countdown span.pop{animation:pop .7s ease-out forwards}
@@ -153,7 +174,7 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 }
 
 /* Mode picker */
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .modes button{text-wrap:balance;appearance:none;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:9px 4px 8px;font-weight:700;font-size:13px;line-height:1.2;display:flex;flex-direction:column;align-items:center;gap:3px}
 .modes button span{font-size:22px;line-height:1}
 .modes button[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
@@ -377,6 +398,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   <section id="screen-setup" class="stack">
     <div class="modes" role="group" aria-label="Chế độ">
       <button data-mode="give"><span>🎁</span>Đua Ngỗng</button>
+      <button data-mode="climb"><span>🐐</span>Dê Leo Núi</button>
       <button data-mode="pass"><span>🎟️</span>Vòng quay may mắn</button>
       <button data-mode="team"><span>⚔️</span>Chia team</button>
       <button data-mode="survive"><span>💥</span>Sinh tồn</button>
@@ -471,6 +493,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         <button data-herd="mix" aria-label="Trộn ngẫu nhiên">🔀 Trộn</button>
       </div>
     </div>
+    <label class="toggle" id="fillWrap"><input type="checkbox" id="fillHerd"> 🐐 Thêm dê rừng cho đủ bầy 30 con</label>
     <label class="toggle" id="colorWrap"><input type="checkbox" id="colorful"> 🎨 Mỗi con một màu</label>
     <label class="toggle" id="numWrap"><input type="checkbox" id="showNum"> <span id="numLabel">Hiện số trên ngỗng</span></label>
     <p class="error" id="err" aria-live="polite"></p>
@@ -481,6 +504,11 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     <div class="mini" id="mini" aria-hidden="true"><b>🏁</b></div>
     <div class="track-wrap" id="trackWrap"><div class="world" id="world"></div></div>
     <p class="status" id="status" aria-live="polite"></p>
+  </section>
+
+  <section id="screen-climb" class="stack mode-climb" hidden>
+    <div class="peak-box" id="peakBox"><div class="peak-wrap" id="peakWrap"><div class="world" id="peakWorld"></div></div></div>
+    <p class="status" id="status6" aria-live="polite"></p>
   </section>
 
   <section id="screen-team" class="stack mode-team" hidden>
@@ -572,7 +600,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   const TEAMS=[{name:"Đội Đỏ",color:"#E4572E",ic:"🔴"},{name:"Đội Xanh",color:"#2E86DE",ic:"🔵"},{name:"Đội Vàng",color:"#E0A800",ic:"🟡"},{name:"Đội Tím",color:"#9B59B6",ic:"🟣"}];
   const DEFAULT="Ngỗng Mập\nNgỗng Lì\nNgỗng Ù\nNgỗng Sún\nNgỗng Xám\nNgỗng Cắn";
   const $=id=>document.getElementById(id);
-  const scr={setup:$("screen-setup"),cup:$("screen-cup"),race:$("screen-race"),team:$("screen-team"),arena:$("screen-arena"),eggs:$("screen-eggs"),ring:$("screen-ring"),result:$("screen-result"),history:$("screen-history")};
+  const scr={setup:$("screen-setup"),cup:$("screen-cup"),race:$("screen-race"),climb:$("screen-climb"),team:$("screen-team"),arena:$("screen-arena"),eggs:$("screen-eggs"),ring:$("screen-ring"),result:$("screen-result"),history:$("screen-history")};
   const ta=$("names");
   // Bộ sinh số ngẫu nhiên sfc32. Mỗi ván nạp lại seed mới bằng freshSeed().
   let _s=[1,2,3,4];
@@ -595,7 +623,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   const show=s=>{
     Object.values(scr).forEach(x=>x.hidden=(x!==s));window.scrollTo(0,0);
     $("backBtn").hidden=s===scr.setup; document.body.classList.toggle("in-game",s!==scr.setup);
-    document.body.classList.toggle("wide",s===scr.cup); // bảng đấu dùng hết bề ngang màn hình
+    document.body.classList.toggle("wide",s===scr.cup||s===scr.climb); // bảng đấu và ngọn núi dùng hết bề ngang màn hình
     if(s!==scr.cup) endPick();
     if(s!==scr.setup&&!(history.state&&history.state.dn)) try{history.pushState({dn:1},"");}catch(e){}
   };
@@ -639,15 +667,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       goose:["Quác!","Quạc quạc!","Ngỗng đây, tránh ra!","Ai đụng tui là mổ!","Cánh này là để bay nha!","Ngỗng là trùm!","Mổ trước hỏi sau!","Lông mới gội đó nha","Quác quác, đói bụng quá","Tui mà thắng là bao cả làng","Đừng nhìn, tui ngại","Cổ dài để thấy đích trước"],
       bunny:["Hop hop!","Cà rốt đâu rồi?","Tai dài để nghe tin thắng!","Nhảy là nghề của tui","Thỏ không chạy, thỏ bay!","Ai lấy cà rốt tui?","Đừng so tui với rùa nha","Chân sau lò xo nè","Bông đuôi xinh không?","Tui mà ngủ quên là thua đó","Nhảy cao nhảy xa"],
       squirrel:["Chít chít!","Hạt dẻ đâu?","Lẹ lên lẹ lên!","Đuôi xù chính hiệu","Tui giấu hạt khắp nơi","Cây nào cao nhất?","Chạy như sóc là đây!","Ai ăn vụng hạt của tui?","Tăng động xíu thôi","Nhanh như chớp!","Đừng cản đường sóc"],
+      goat:["Beee!","Be be be!","Cỏ trên đỉnh ngon lắm nghe nói","Vách này dễ ợt","Móng tui bám đá cực chắc","Đói quá, leo lẹ!","Ai giành cỏ với tui?","Sừng này để húc đó nha","Nhìn xuống chóng mặt ghê","Dê núi chính hiệu","Đá lở kìa!","Leo núi là nghề của tui"],
       penguin:["Lạch bạch!","Trượt nè!","Ở đây nóng quá à","Tui mặc vest đi đua đó","Băng đâu cho tui trượt?","Đi chậm mà chắc","Cá, tui muốn cá!","Chân ngắn nhưng ý chí dài","Đừng cười dáng đi tui","Không bay được thì tui lăn","Lịch lãm từng bước"]
     },
     start:{all:["Xuất phát!","Chạy thôi!","Let's go!","Đi nào!","Ai về chót bao nha!","Hít thở sâu…","Bật mode nghiêm túc"]},
     sprint:{all:["💨 Tăng tốc!","Bật turbo!","Vào số 5!","Nitro!","💨 Đuổi theo tui nè!","Chạy như bị đòi nợ!"],
-      goose:["Vỗ cánh full công suất!","Cánh quạt mode!"],bunny:["Bật lò xo!","Nhảy cóc x2!"],squirrel:["Chạy như bị đuổi!","Chít chít chít!!"],penguin:["Lăn tròn nè!","Chế độ bowling!"]},
+      goose:["Vỗ cánh full công suất!","Cánh quạt mode!"],bunny:["Bật lò xo!","Nhảy cóc x2!"],squirrel:["Chạy như bị đuổi!","Chít chít chít!!"],penguin:["Lăn tròn nè!","Chế độ bowling!"],goat:["Nhảy vách nè!","Bật đá 3 bước!","Phóng lên!","Bám chắc rồi, nhảy!"]},
     stall:{all:["🤔","Ủa mình đi đâu vậy ta?","Nghỉ xíu…","Quên tắt bếp!","Đợi tui buộc dây giày","Con bướm đẹp quá","Mệt quá à","Lạc đường rồi","Hình như rớt mạng","Để tui check tin nhắn"],
-      goose:["Có con sâu kìa","Chải lông xíu"],bunny:["Ngửi thấy cà rốt","Ngáp một cái"],squirrel:["Để tui chôn hạt đã","Nghe tiếng gì đó"],penguin:["Chân tê rồi","Nhớ Nam Cực quá"]},
-    lead:{all:["Top 1 nè!","Bắt kịp tui đi!","Đẳng cấp là đây","Bye bye mấy đứa!","Ai dám vượt tui?","Nhìn lưng tui mà chạy","Tui đi trước dọn đường"]},
-    win:{all:["Vô địch!","GG!","Easy game!","Cảm ơn đã theo dõi!","Thắng rồi, bao trà sữa nha!","Không ai cản nổi tui!","Tui biết mà!"]},
+      goose:["Có con sâu kìa","Chải lông xíu"],bunny:["Ngửi thấy cà rốt","Ngáp một cái"],squirrel:["Để tui chôn hạt đã","Nghe tiếng gì đó"],penguin:["Chân tê rồi","Nhớ Nam Cực quá"],goat:["Gặm miếng cỏ đã","Măm măm 🌿","Bụi cỏ ngon quá","Trượt chân xíu","Đường này cụt rồi","Ngắm cảnh chút"]},
+    lead:{goat:["Thấy bãi cỏ rồi!","Đỉnh núi kìa!"],all:["Top 1 nè!","Bắt kịp tui đi!","Đẳng cấp là đây","Bye bye mấy đứa!","Ai dám vượt tui?","Nhìn lưng tui mà chạy","Tui đi trước dọn đường"]},
+    win:{goat:["Cỏ non của tui hết!","Măm măm, ngon quá 🌿","Đỉnh núi là của tui!","Cả bãi cỏ này của tui!"],all:["Vô địch!","GG!","Easy game!","Cảm ơn đã theo dõi!","Thắng rồi, bao trà sữa nha!","Không ai cản nổi tui!","Tui biết mà!"]},
     attack:{all:["Cắn nè!","Xin một miếng!","Ra khỏi sân!","Chào nhé!","Đi đâu đó?","Tới lượt bạn!","Đứng yên đó!"],goose:["Mổ cho phát!"],squirrel:["Cắn như cắn hạt!"],penguin:["Húc nè!"],bunny:["Đá hậu nè!"]},
     hit:{all:["Á!","Oái!","Bay màu!","Hẹn kiếp sau!","Tui sẽ quay lại!","Không công bằng!","Report!","Mẹ ơi cứu!"]},
     changeMind:{all:["Đổi ý!","Chuồng kia đẹp hơn","Hình như bạn tui bên kia","Thôi qua đây","Để tui suy nghĩ lại"]},
@@ -713,9 +742,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   let paintN=0;
   function paint(t){
     const remeasure=(paintN++%60)===0;
-    for(const sp of sprites) if(!sp.vl&&sp.el.isConnected&&(remeasure||sp.h===undefined)) sp.h=sp.el.clientHeight;
+    for(const sp of sprites) if(!sp.vl&&!sp.goat&&sp.el.isConnected&&(remeasure||sp.h===undefined)) sp.h=sp.el.clientHeight;
     for(const sp of sprites){
       if(!sp.el.isConnected){ if(sp.added) sprites.delete(sp); continue; }
+      if(sp.goat){ // dê núi: sheet riêng, kích thước cố định nên không cần đo
+        sp.added=true;
+        const st=sp.getAnim(), a=GOAT_ANIMS[st.a]||GOAT_ANIMS.walk, f=Math.floor((t/1000+sp.phase)*a.fps)%4;
+        const row=sp.v*8+a.row*2+(st.d?1:0), key=row*10+f;
+        if(key!==sp.f){sp.f=key; sp.el.style.backgroundPosition=`${(-(f*GOAT_STEP+1)*sp.k).toFixed(1)}px ${(-(row*GOAT_STEP+1)*sp.k).toFixed(1)}px`;}
+        continue;
+      }
       if(sp.vl){ // nhân vật kiếm hiệp: đứng/chạy lặp lại, các động tác khác chạy một lần rồi giữ khung cuối
         sp.added=true;
         const st=sp.getAnim(), c=sp.c, an=c.anims[st.a]||c.anims.idle, fps=VL_FPS[st.a]||8;
@@ -745,6 +781,18 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     sprites.add({el,getAnim,vl:true,c,s,phase:rnd()*10,f:-1,added:false});
     return el;
   }
+  // Dê núi (mode climb): Sevarihk – Mountain Goat Sprites (CC-BY 4.0), ghép thành sprites/de-nui.png.
+  // Ô 63x63, bước 65 (viền trống 1px). 4 kiểu dê (trắng sừng to, trắng sừng nhỏ, nâu sừng to, nâu sừng nhỏ), mỗi kiểu 8 hàng:
+  // đi, nhảy, gặm cỏ, ngó nghiêng; mỗi động tác 2 hàng (quay trái, quay phải), 4 khung.
+  const GOAT_CELL=63, GOAT_STEP=65, GOAT_VARIANTS=4;
+  const GOAT_ANIMS={walk:{row:0,fps:8},jump:{row:1,fps:7},graze:{row:2,fps:4},look:{row:3,fps:3}};
+  // getAnim() trả về {a: tên động tác, d: 1 quay phải / 0 quay trái}
+  function goatSprite(v,size,getAnim){
+    const el=document.createElement("div"), k=size/GOAT_CELL; el.className="gspr";
+    el.style.backgroundSize=`${(4*GOAT_STEP*k).toFixed(1)}px ${(GOAT_VARIANTS*8*GOAT_STEP*k).toFixed(1)}px`;
+    sprites.add({el,getAnim,goat:true,v,k,phase:rnd()*10,f:-1,added:false});
+    return el;
+  }
   function makeGoose(r,getAnim){
     const root=document.createElement("div"); root.className="goose";
     // càng ít phần tử con càng nhẹ khi đông: vương miện chỉ có 1 cái (chuyển sang con dẫn đầu), huy hiệu số chỉ tạo khi bật "Hiện số"
@@ -765,7 +813,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   }
   // bong bóng sát mép phải thì lật sang trái cho khỏi bị cắt chữ; xét lại mỗi khung hình vì con thú vẫn chạy
   function sideBubble(r){
-    const b=r.bubble, box=b.closest(".track-wrap,.pasture,.ring,.nest"); if(!box) return;
+    const b=r.bubble, box=b.closest(".track-wrap,.peak-wrap,.pasture,.ring,.nest"); if(!box) return;
     const gr=r.el.getBoundingClientRect(), right=gr.left+gr.width*.88+b.offsetWidth, edge=box.getBoundingClientRect().right-4;
     if(right>edge) b.classList.add("left"); else if(right<edge-20) b.classList.remove("left");
   }
@@ -813,7 +861,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   function countdown(host,my,done){
     let ov=host.querySelector(":scope > .countdown");
     if(!ov){ov=document.createElement("div");ov.className="countdown";ov.innerHTML="<span></span>";host.appendChild(ov);}
-    const el=ov.firstChild, seq=["3","2","1",herd==="mix"?"Xuất phát!":SP_INFO[herd].cry];
+    const el=ov.firstChild, seq=["3","2","1",mode==="climb"?"Beee!":herd==="mix"?"Xuất phát!":SP_INFO[herd].cry];
     seq.forEach((s,i)=>setTimeout(()=>{
       if(my!==session) return;
       el.textContent=s; el.style.fontSize=s.length>6?"56px":""; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
@@ -834,8 +882,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Setup ---------- */
   // Tên gọi thay theo đàn thú đang chọn (ngỗng, thỏ, ... hoặc thú khi trộn), dùng trong lời dẫn và nút
-  const NOUN={goose:"ngỗng",bunny:"thỏ",squirrel:"sóc",penguin:"cánh cụt",mix:"thú"};
-  const noun=()=>NOUN[herd]||"thú";
+  const NOUN={goose:"ngỗng",bunny:"thỏ",squirrel:"sóc",penguin:"cánh cụt",mix:"thú",goat:"dê"};
+  const noun=()=>mode==="climb"?"dê":NOUN[herd]||"thú";
   const Noun=()=>noun().split(" ").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
   const momName=()=>herd==="mix"?"Ngỗng mẹ":`${Noun()} mẹ`;
   const prizeName=()=>($("prize").value.trim()||"Battle Pass");
@@ -849,6 +897,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   const weaponHint=()=>"Môn phái: "+WEAPONS.map(w=>`${w.name} ${w.min}–${w.max}${w.cd<.8?" (nhanh)":w.cd>1.2?" (chậm)":""}`).join(" · ")+`. Chí mạng ${Math.round(CRIT*100)}% gấp đôi, né ${Math.round(DODGE*100)}%.`;
   const MODE_INFO={
     give:{h:()=>`Con ${noun()} nào về nhất, người đó thắng.`,lede:()=>`Mỗi người một con ${noun()}, chạy hoàn toàn ngẫu nhiên trên đường đua dài. Camera bám theo con dẫn đầu cho tới vạch đích.`,go:()=>"Xuất phát",max:40,dur:"Độ dài đường đua"},
+    climb:{h:()=>"Dê nào lên đỉnh gặm cỏ trước, người đó thắng.",lede:()=>`Mỗi người một con dê núi. Cả bầy leo vách đá tìm bãi cỏ non trên đỉnh, vừa leo vừa nhảy, thỉnh thoảng dừng gặm cỏ dọc đường. Ít người thì thả thêm dê rừng cho đủ bầy ${CLIMB_HERD} con.`,go:()=>"Thả dê leo núi",max:40,dur:"Độ cao ngọn núi"},
     team:{h:()=>`Thả ${noun()}, tự chia đội.`,lede:()=>"Cả đàn xuất phát cùng lúc và tự chạy vào chuồng. Các đội luôn đều nhau, và bạn có thể bắt vài con dính nhau hoặc cấm chung chuồng.",go:()=>`Thả ${noun()}`,max:40},
     survive:{h:()=>"Phát vũ khí, chém nhau tới người cuối cùng.",lede:()=>"Mỗi người một chiến binh pixel với một món vũ khí ngẫu nhiên, mỗi món có sát thương tối thiểu–tối đa riêng. Cả sân lao vào chém nhau, hết máu là văng khỏi sân. Cuối trận bo thu hẹp, ở ngoài bo bị mất máu. Ai trụ lại cuối cùng là người thắng.",go:()=>"Vào đấu trường",max:40,dur:"Thời lượng trận"},
     egg:{h:()=>"Trứng ai nở trước, người đó trúng.",lede:()=>`Mỗi người một quả trứng. ${momName()} đi ấp lòng vòng, trứng rung rồi nứt dần. Quả nào nở ra con non đầu tiên là thắng.`,go:()=>"Bắt đầu ấp",max:40,dur:"Thời gian ấp"},
@@ -870,6 +919,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   let showNum=store.get("dua-ngong-num","0")==="1";
   let avoidLast=store.get("dua-ngong-avoid","1")==="1";
   let colorful=store.get("dua-ngong-color","1")==="1";
+  let fillHerd=store.get("dua-ngong-fill","1")==="1"; // Dê Leo Núi: thêm dê rừng (không tính thắng) cho đủ bầy
+  const CLIMB_HERD=30;
   let herd=store.get("dua-ngong-herd","goose"); if(herd!=="mix"&&!SP_INFO[herd]) herd="goose";
   // Giải đấu: thể thức, cách tạo đội, số người mỗi đội khi ghép ngẫu nhiên
   const CUP_KEY="dua-ngong-cup", CUP_FMTS=["double","single","rr"], CUP_BUILDS=["solo","random","preset"];
@@ -961,6 +1012,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   $("showNum").addEventListener("change",e=>{showNum=e.target.checked;store.set("dua-ngong-num",showNum?"1":"0");document.body.classList.toggle("hide-num",!showNum);});
   $("colorful").checked=colorful;
   $("colorful").addEventListener("change",e=>{colorful=e.target.checked;store.set("dua-ngong-color",colorful?"1":"0");});
+  $("fillHerd").checked=fillHerd;
+  $("fillHerd").addEventListener("change",e=>{fillHerd=e.target.checked;store.set("dua-ngong-fill",fillHerd?"1":"0");});
   $("avoidLast").checked=avoidLast;
   $("avoidLast").addEventListener("change",e=>{avoidLast=e.target.checked;store.set("dua-ngong-avoid",avoidLast?"1":"0");});
   function lastWinInfo(){const lw=store.get("dua-ngong-lastwin","");$("lastPayInfo").textContent=lw?`Lần trước: ${lw} ẵm giải.`:"Chưa có ai thắng lần nào.";}
@@ -982,14 +1035,15 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     $("teamOpts").hidden=mode!=="team";
     $("payOpts").hidden=mode!=="pass";
     $("numWrap").hidden=mode==="pass"||mode==="cup"||mode==="survive";
-    $("herdWrap").hidden=$("colorWrap").hidden=mode==="cup"||mode==="survive";
+    $("herdWrap").hidden=$("colorWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb";
+    $("fillWrap").hidden=mode!=="climb";
     $("cupOpts").hidden=mode!=="cup";
     $("survHint").hidden=mode!=="survive"; if(mode==="survive") $("survHint").textContent=weaponHint();
     document.querySelectorAll("[data-cupfmt]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.cupfmt===cupFmt)));
     document.querySelectorAll("[data-cupbuild]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.cupbuild===cupBuild)));
     document.querySelectorAll("[data-cupsize]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.cupsize===cupSize)));
     cupArmed=false;
-    $("listHint").textContent=`Từ 2 đến ${info.max} tên. Danh sách được giữ lại cho lần sau. `+(mode==="survive"?"Nhân vật: LuizMelo – Martial Hero 1–3 (CC0).":"Sprite thú: Duckhive (CC0).");
+    $("listHint").textContent=`Từ 2 đến ${info.max} tên. Danh sách được giữ lại cho lần sau. `+(mode==="survive"?"Nhân vật: LuizMelo – Martial Hero 1–3 (CC0).":mode==="climb"?"Dê núi: Sevarihk (CC-BY 4.0). Nền núi: ansimuz (CC0).":"Sprite thú: Duckhive (CC0).");
     $("err").textContent="";
     applyText(); updateCount(); refreshSelects(); if(mode==="pass") lastWinInfo(); if(mode==="cup") cupSetupInfo();
   }
@@ -1032,6 +1086,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     let pool=[]; while(pool.length<items.length) pool=pool.concat(shuffle(SPECIES));
     const racers=items.map((name,i)=>{const color=COLORS[i%COLORS.length];return {name,num:i+1,color,tint:colorful?color:null,sp:herd==="mix"?pool[i]:herd};});
     if(mode==="give") return startGive(racers);
+    if(mode==="climb") return startClimb(racers);
     if(mode==="survive") return startSurvive(racers);
     if(mode==="egg") return startEgg(racers);
     if(mode==="pass") return startRing(racers);
@@ -1103,7 +1158,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Lịch sử các ván ---------- */
   const HIST_KEY="dua-ngong-history", HIST_MAX=100;
-  const MODE_LABEL={cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
+  const MODE_LABEL={cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",climb:"🐐 Dê Leo Núi",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
   function loadHistory(){try{const h=JSON.parse(store.get(HIST_KEY,"[]"));return Array.isArray(h)?h:[];}catch(e){return [];}}
   function addHistory(e){const h=loadHistory();h.unshift({t:Date.now(),...e});store.set(HIST_KEY,JSON.stringify(h.slice(0,HIST_MAX)));}
   const fmtTime=t=>{const d=new Date(t),p=x=>String(x).padStart(2,"0");return `${p(d.getHours())}:${p(d.getMinutes())} ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;};
@@ -1154,11 +1209,12 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     RES=cfg;
     const tint=colorful&&cfg.tint!==false?cfg.color:null;
     const wg=$("winGoose"); wg.innerHTML=""; wg.className="g"+(cfg.baby&&!tint&&(cfg.sp||"goose")==="goose"?" baby":"");
-    if(cfg.hero) wg.appendChild(fighterSprite(cfg.hero,100,()=>({a:"idle",t0:0})));
+    if(cfg.goat){const g=goatSprite(cfg.goat.v,128,()=>({a:"graze",d:1}));g.style.cssText+=";position:absolute;left:16px;top:0;width:128px;height:128px";wg.appendChild(g);}
+    else if(cfg.hero) wg.appendChild(fighterSprite(cfg.hero,100,()=>({a:"idle",t0:0})));
     else wg.appendChild(makeSprite(()=>cfg.anim||"cheer",cfg.sp,tint).el);
     if(cfg.num){const bd=document.createElement("span");bd.className="badge";bd.style.background=cfg.color;bd.textContent=cfg.num;wg.appendChild(bd);}
     $("winLabel").textContent=cfg.label; $("winName").textContent=cfg.name;
-    addHistory({mode,herd,n:cfg.n||(cfg.order?cfg.order.length:0),winner:cfg.name,prize:mode==="pass"?prizeName():"",top:(cfg.order||[]).slice(1,3).map(r=>r.name)});
+    addHistory({mode,herd:mode==="climb"?"goat":herd,n:cfg.n||(cfg.order?cfg.order.length:0),winner:cfg.name,prize:mode==="pass"?prizeName():"",top:(cfg.order||[]).slice(1,3).map(r=>r.name)});
     const ol=$("rank"); ol.innerHTML=""; ol.hidden=!cfg.order;
     (cfg.order||[]).forEach(r=>{const li=document.createElement("li");const sw=document.createElement("span");sw.className="sw";sw.style.background=r.color;li.appendChild(sw);li.appendChild(document.createTextNode(r.name+(cfg.note?" · "+cfg.note(r):"")));ol.appendChild(li);});
     $("again").textContent=cfg.again;
@@ -1252,6 +1308,144 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       const order=G.finished.concat(G.racers.filter(r=>!G.finished.includes(r)).sort((a,b)=>b.p-a.p)), w=order[0];
       setTimeout(()=>G.my===session&&showResult({label:"🏆 Về nhất",name:w.name,sp:w.sp,color:w.color,num:showNum?w.num:0,order,again:"Đua lại",
         removeText:order.length>2?`Loại "${w.name}", đua tiếp`:null,copy:rankCopy(`🏆 Người thắng: ${w.name}`,order)}),300);
+      return false;
+    }
+  }
+
+  /* ---------- Mode: Dê Leo Núi (climb) ---------- */
+  // Cả bầy leo vách núi lên bãi cỏ trên đỉnh; tốc độ y như Đua Ngỗng, chỉ khác đường đi là zíc zắc lên dốc.
+  // Camera cuộn dọc bằng scrollTop (không transform #world, lý do như Đua Ngỗng).
+  // Ít người thì thêm dê rừng cho đủ CLIMB_HERD con: leo cùng cho ra bầy nhưng không nói, không tính thắng, không xếp hạng.
+  const NS_SVG="http://www.w3.org/2000/svg";
+  let CL=null;
+  function startClimb(players){
+    const my=++session; show(scr.climb);
+    const box=$("peakBox"), wrap=$("peakWrap"), world=$("peakWorld"); world.innerHTML="";
+    const wild=fillHerd?Math.max(0,CLIMB_HERD-players.length):0;
+    const goats=players.concat(Array.from({length:wild},()=>({wild:true,name:""})));
+    const n=goats.length, W=wrap.clientWidth, VH=Math.round(clamp(window.innerHeight-170,420,900));
+    wrap.style.height=VH+"px";
+    // ô sprite vuông, con dê chiếm khoảng 3/4 ô; màn rộng (desktop) thì dê to hơn
+    const gs=Math.round((n<=10?60:n<=20?52:46)*clamp(Math.min(W/380,VH/520),1,1.6));
+    const TOP=150, CLIMB=Math.round(VH*(dur/15)*1.15), BASE=TOP+CLIMB, H=BASE+70, cx=W/2;
+    const ALT=dur<=15?900:dur<=30?1800:2800; // độ cao hiển thị (m)
+    world.style.height=H+"px";
+    // nửa bề ngang vách núi theo độ cao: hẹp ở đỉnh (bãi cỏ), loe ra dưới chân
+    const topHW=Math.min(W*.14,130), hw=y=>topHW+(W*.52-topHW)*clamp((y-TOP)/CLIMB,0,1);
+
+    const svg=document.createElementNS(NS_SVG,"svg");
+    svg.setAttribute("width",W); svg.setAttribute("height",H); svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+    const el=(tag,attrs)=>{const e=document.createElementNS(NS_SVG,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);svg.appendChild(e);return e;};
+    svg.innerHTML=`<defs><linearGradient id="rock" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#7d5274"/><stop offset=".45" stop-color="#5a3c5f"/><stop offset="1" stop-color="#3a2743"/></linearGradient></defs>`;
+    const left=[], right=[];
+    for(let y=TOP;y<=H+36;y+=36){
+      const j=y>TOP+50?W*.035:0;
+      left.push([cx-hw(y)-between(0,j),y]); right.push([cx+hw(y)+between(0,j),y]);
+    }
+    const pts=[[left[0][0]+6,TOP-6],[cx,TOP-12],[right[0][0]-6,TOP-6]].concat(right,left.slice().reverse());
+    el("polygon",{points:pts.map(p=>p.map(v=>v.toFixed(1)).join(",")).join(" "),fill:"url(#rock)"});
+    // tuyết phủ gần đỉnh, mép dưới lởm chởm
+    const snowY=TOP+Math.min(170,CLIMB*.14), snow=[];
+    for(let x=cx-hw(snowY);x<=cx+hw(snowY);x+=14) snow.push([x,snowY+between(-18,10)]);
+    el("polygon",{points:[[left[0][0]+6,TOP-6],[cx,TOP-12],[right[0][0]-6,TOP-6],[cx+hw(snowY),snowY]].concat(snow.reverse(),[[cx-hw(snowY),snowY]]).map(p=>p.map(v=>v.toFixed(1)).join(",")).join(" "),fill:"#E6DCEE",opacity:".85"});
+    // vết nứt và gờ đá
+    for(let k=0;k<Math.round(CLIMB/26);k++){
+      const y=between(TOP+40,BASE), x=cx+hw(y)*between(-.85,.85);
+      if(rnd()<.55){let d=`M${x.toFixed(1)} ${y.toFixed(1)}`, px=x, py=y; for(let s=0;s<3;s++){px+=between(-10,10);py+=between(6,16);d+=` L${px.toFixed(1)} ${py.toFixed(1)}`;}
+        el("path",{d,stroke:"#2a1b31",fill:"none","stroke-width":"2",opacity:".55"});}
+      else el("line",{x1:x.toFixed(1),y1:y.toFixed(1),x2:(x+between(18,46)).toFixed(1),y2:(y+between(-3,3)).toFixed(1),stroke:"#9a7394","stroke-width":"3","stroke-linecap":"round",opacity:".7"});
+    }
+    // bãi cỏ trên đỉnh
+    el("ellipse",{cx,cy:TOP,rx:hw(TOP)+10,ry:15,fill:"#4E8A2E"});
+    el("ellipse",{cx,cy:TOP-3,rx:hw(TOP)-2,ry:9,fill:"#7DB344"});
+    world.appendChild(svg);
+    const rung=document.createElement("div"); rung.className="rung"; world.appendChild(rung);
+    const deco=(cls,text,x,y)=>{const d=document.createElement("span");d.className=cls;d.textContent=text;d.style.left=x+"px";d.style.top=y+"px";world.appendChild(d);};
+    for(let k=0;k<Math.round(CLIMB/60);k++){const y=between(TOP+60,BASE-20);deco("tuft",pick(["🌿","🌱","🌿","🪨"]),cx+hw(y)*between(-.8,.8),y);}
+    for(let k=0;k<7;k++) deco("tuft",pick(["🌿","🌱","🌼","🌿"]),cx+hw(TOP)*between(-.95,.95),TOP+between(-4,6));
+    deco("summit-sign","🌿 Bãi cỏ non",cx,TOP-gs-18);
+    const steps=Math.max(3,Math.round(dur/5));
+    for(let k=1;k<=steps;k++) deco("alt",`${Math.round(k/steps*ALT)} m`,6,BASE-CLIMB*k/steps);
+
+    const lanes=shuffle(goats.map((_,i)=>n>1?i/(n-1)*2-1:0));
+    CL={my,goats,players,W,VH,wrap,TOP,CLIMB,BASE,H,cx,hw,gs,ALT,zig:2+dur/15,cam:H-VH,bg:"",running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
+    goats.forEach((r,i)=>{
+      Object.assign(r,{p:0,base:between(.96,1.04)/dur,mult:1,target:1,retarget:0,state:"run",stateT:0,bubbleT:0,done:false,sp:"goat",
+        u:lanes[i]*.8,ph:rnd()*Math.PI*2,amp:between(.25,.45),oy:between(-.7,.7)*gs,oyEnd:between(-8,12),v:Math.floor(rnd()*GOAT_VARIANTS),dir:rnd()<.5?1:0,stallA:"look",zi:null});
+      world.appendChild(makeGoat(r,()=>({a:r.done?"graze":!CL.running?"look":r.state==="stall"?r.stallA:r.state==="sprint"?"jump":"walk",d:r.dir})));
+      placeClimb(r);
+    });
+    wrap.scrollTop=CL.cam; climbBg();
+    $("status6").textContent=`Bầy ${n} con dê đã tới chân núi…`;
+    countdown(box,my,()=>{CL.running=true;$("status6").textContent="Leo thôi!";shuffle(players).slice(0,Math.min(3,players.length)).forEach(r=>say(r,line(r,"start")));loop(my,tickClimb);});
+  }
+  function makeGoat(r,getAnim){
+    const root=document.createElement("div"); root.className="goose"+(r.wild?" wild":"");
+    root.style.width=root.style.height=CL.gs+"px";
+    root.appendChild(goatSprite(r.v,CL.gs,getAnim));
+    if(!r.wild){
+      root.insertAdjacentHTML("beforeend",`<span class="bubble"></span><span class="gname"></span>`);
+      const nm=root.querySelector(".gname"); nm.textContent=r.name; nm.style.setProperty("--c",r.color);
+      if(showNum&&r.num){const bd=document.createElement("span"); bd.className="badge"; bd.style.background=r.color; bd.textContent=r.num; root.appendChild(bd);}
+      r.bubble=root.querySelector(".bubble");
+    }
+    r.el=root; return root;
+  }
+  // đường leo zíc zắc: mỗi con một làn u (-1..1) cộng sóng sin theo quãng đã leo, ép vào bề ngang vách ở độ cao đó
+  function climbX(r,p){return CL.cx+CL.hw(CL.BASE-p*CL.CLIMB)*.82*clamp(r.u+r.amp*Math.sin(r.ph+p*CL.zig*Math.PI*2),-1,1);}
+  function placeClimb(r){
+    // oy: lệch dọc riêng từng con (chỉ để nhìn, không ảnh hưởng thắng thua) cho bầy tản ra thay vì dính thành một hàng
+    const p=Math.min(r.p,1), y=CL.BASE-p*CL.CLIMB+r.oy*(1-p)+r.oyEnd*p, x=climbX(r,p);
+    if(!r.done&&CL.running){const dx=climbX(r,Math.min(1,p+.004))-x; if(Math.abs(dx)>.05) r.dir=dx>0?1:0;}
+    r.el.style.transform=`translate(${(x-CL.gs/2).toFixed(1)}px,${(y-CL.gs*.9).toFixed(1)}px)`;
+    const zi=10+Math.round(y/4); if(zi!==r.zi){r.zi=zi; r.el.style.zIndex=String(zi);} // con ở thấp hơn đứng trước
+  }
+  // núi xa chìm dần khi camera lên cao
+  function climbBg(){
+    const f=1-CL.cam/Math.max(1,CL.H-CL.VH), a=Math.round(f*CL.VH*.55), b=Math.round(f*CL.VH*.3);
+    const bg=`0 calc(100% + ${a}px),35% calc(100% + ${b}px),center top`;
+    if(bg!==CL.bg){CL.bg=bg; CL.wrap.style.backgroundPosition=bg;}
+  }
+  function tickClimb(dt){
+    CL.t+=dt;
+    const avg=CL.goats.reduce((s,r)=>s+r.p,0)/CL.goats.length;
+    for(const r of CL.goats){
+      if(r.done) continue;
+      r.retarget-=dt; r.stateT-=dt; tickBubble(r,dt);
+      if(r.retarget<=0){r.target=between(.6,1.45);r.retarget=between(.3,.8);}
+      if(r.state!=="run"&&r.stateT<=0) r.state="run";
+      if(r.state==="run"){
+        const roll=rnd();
+        if(roll<.09*dt){r.state="stall";r.stateT=between(.5,1.1);r.stallA=rnd()<.6?"graze":"look";say(r,line(r,"stall"));}
+        else if(roll<.20*dt){r.state="sprint";r.stateT=between(.6,1.2);say(r,line(r,"sprint"));}
+        else if(roll<.29*dt){say(r,line(r,"chat"));}
+      }
+      r.mult+=(r.target-r.mult)*Math.min(1,dt*3);
+      let m=r.mult*(r.state==="stall"?.1:r.state==="sprint"?1.9:1);
+      m*=clamp(1+(avg-r.p)*2.4,.82,1.3); // con tụt lại được đẩy nhẹ cho kịch tính
+      r.p+=r.base*m*dt;
+      if(r.p>=1){
+        r.p=1; r.done=true;
+        if(!r.wild){
+          CL.finished.push(r);
+          if(!CL.winner){CL.winner=r;CL.finishedAt=CL.t;say(r,line(r,"win"),2.5);honk(1.6);honk(1.6,.28);$("status6").textContent=`🏆 ${r.name} lên đỉnh đầu tiên!`;}
+        }
+      }
+      placeClimb(r);
+    }
+    let leader=CL.players[0]; for(const r of CL.players) if(r.p>leader.p) leader=r;
+    if(!CL.crown){CL.crown=document.createElement("span"); CL.crown.className="crown"; CL.crown.textContent="👑";}
+    if(CL.winner){ if(CL.crown.isConnected) CL.crown.remove(); }
+    else if(CL.crownOn!==leader){ leader.el.appendChild(CL.crown); CL.crownOn=leader; }
+    if(!CL.winner&&leader.name!==CL.leaderName){CL.leaderName=leader.name;$("status6").textContent=`Dẫn đầu: ${leader.name}`;if(CL.t>2&&rnd()<.5)say(leader,line(leader,"lead"));}
+    const target=clamp(CL.BASE-leader.p*CL.CLIMB-CL.VH*.42,0,CL.H-CL.VH);
+    CL.cam+=(target-CL.cam)*Math.min(1,dt*4);
+    CL.wrap.scrollTop=CL.cam; climbBg();
+    if(CL.winner&&CL.t-CL.finishedAt>1.6){
+      CL.running=false;
+      const order=CL.finished.concat(CL.players.filter(r=>!r.done).sort((a,b)=>b.p-a.p)), w=order[0];
+      setTimeout(()=>CL.my===session&&showResult({label:"🏆 Lên đỉnh đầu tiên",name:w.name,goat:{v:w.v},color:w.color,num:showNum?w.num:0,order,again:"Leo lại",
+        removeText:order.length>2?`Loại "${w.name}", leo tiếp`:null,copy:rankCopy(`🏆 Lên đỉnh đầu tiên: ${w.name}`,order)}),300);
       return false;
     }
   }
