@@ -1433,7 +1433,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       if(r.done){ // đã tới đích theo p nhưng có thể còn đang nhảy những cú cuối lên bãi cỏ
         if(r.landed) continue;
         tickBubble(r,dt); hopTick(r,dt); placeClimb(r);
-        if(!r.hop&&r.hy-climbY(r,1)<=.5) r.landed=true;
+        // về đích tính lúc đáp xuống bãi cỏ trên màn hình, để thứ hạng khớp với cái người xem thấy
+        if(!r.hop&&r.hy-climbY(r,1)<=.5){
+          r.landed=true;
+          if(!r.wild){
+            CL.finished.push(r);
+            if(!CL.winner){CL.winner=r;CL.finishedAt=CL.t;say(r,line(r,"win"),2.5);honk(1.6);honk(1.6,.28);$("status6").textContent=`🏆 ${r.name} lên đỉnh đầu tiên!`;}
+          }
+        }
         continue;
       }
       r.retarget-=dt; r.stateT-=dt; tickBubble(r,dt);
@@ -1449,16 +1456,13 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       let m=r.mult*(r.state==="stall"?.1:r.state==="sprint"?1.9:1);
       m*=clamp(1+(avg-r.p)*2.4,.82,1.3); // con tụt lại được đẩy nhẹ cho kịch tính
       r.p+=r.base*m*dt;
-      if(r.p>=1){
-        r.p=1; r.done=true;
-        if(!r.wild){
-          CL.finished.push(r);
-          if(!CL.winner){CL.winner=r;CL.finishedAt=CL.t;say(r,line(r,"win"),2.5);honk(1.6);honk(1.6,.28);$("status6").textContent=`🏆 ${r.name} lên đỉnh đầu tiên!`;}
-        }
-      }
+      // dê rừng không tính thắng, nên không cho lên đỉnh trước người chơi kẻo người xem tưởng nó thắng
+      if(r.wild&&!CL.winner) r.p=Math.min(r.p,.94);
+      if(r.p>=1){ r.p=1; r.done=true; }
       hopTick(r,dt); placeClimb(r);
     }
-    let leader=CL.players[0]; for(const r of CL.players) if(r.p>leader.p) leader=r;
+    // dẫn đầu theo vị trí trên màn hình (cao nhất), khớp với cái người xem thấy
+    let leader=CL.players[0]; for(const r of CL.players) if(r.hy<leader.hy||(r.hy===leader.hy&&r.p>leader.p)) leader=r;
     if(!CL.crown){CL.crown=document.createElement("span"); CL.crown.className="crown"; CL.crown.textContent="👑";}
     if(CL.winner){ if(CL.crown.isConnected) CL.crown.remove(); }
     else if(CL.crownOn!==leader){ leader.el.appendChild(CL.crown); CL.crownOn=leader; }
@@ -1468,7 +1472,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     CL.wrap.scrollTop=CL.cam; climbBg();
     if(CL.winner&&CL.t-CL.finishedAt>1.6){
       CL.running=false;
-      const order=CL.finished.concat(CL.players.filter(r=>!r.done).sort((a,b)=>b.p-a.p)), w=order[0];
+      const order=CL.finished.concat(CL.players.filter(r=>!r.landed).sort((a,b)=>a.hy-b.hy||b.p-a.p)), w=order[0];
       setTimeout(()=>CL.my===session&&showResult({label:"🏆 Lên đỉnh đầu tiên",name:w.name,goat:{v:w.v},color:w.color,num:showNum?w.num:0,order,again:"Leo lại",
         removeText:order.length>2?`Loại "${w.name}", leo tiếp`:null,copy:rankCopy(`🏆 Lên đỉnh đầu tiên: ${w.name}`,order)}),300);
       return false;
