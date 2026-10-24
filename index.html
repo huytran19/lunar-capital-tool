@@ -1407,11 +1407,13 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const gap=r.hy-climbY(r,Math.min(r.p,1));
     if(gap<CL.step&&!(r.p>=1&&gap>.5)) return;
     const dy=Math.min(gap,CL.step*2.2), y1=r.hy-dy, half=CL.hw(y1)*.9;
-    // nhìn ngang vào sườn núi nên dê luôn quay nghiêng: mỗi cú bật chéo lên theo hướng đang quay mặt,
-    // thỉnh thoảng đổi hướng, dạt xa khỏi làn thì quay đầu nhảy về
-    if(Math.abs(r.ox)>CL.gs*.8) r.side=r.ox>0?0:1; else if(rnd()<.25) r.side=1-r.side;
-    r.ox+=(r.side?1:-1)*between(.3,.6)*CL.gs;
-    const x1=clamp(laneX(r,y1)+r.ox,CL.cx-half,CL.cx+half);
+    // nhìn ngang vào sườn núi nên dê luôn quay nghiêng. Mỗi cú bật xéo lên khoảng 45° theo hướng đang quay mặt,
+    // nhảy vài cú liền một hướng rồi mới quay đầu (dạt quá xa khỏi làn hoặc chạm mép vách thì quay về)
+    const lx=laneX(r,y1);
+    if(Math.abs(r.ox)>CL.gs*2.4) r.side=r.ox>0?0:1; else if(rnd()<.12) r.side=1-r.side;
+    if(lx+r.ox>CL.cx+half-CL.gs*.6) r.side=0; else if(lx+r.ox<CL.cx-half+CL.gs*.6) r.side=1;
+    r.ox+=(r.side?1:-1)*dy*between(.8,1.15);
+    const x1=clamp(lx+r.ox,CL.cx-half,CL.cx+half); r.ox=x1-lx;
     r.hop={x0:r.hx,y0:r.hy,x1,y1,k:0,T:clamp(.32+dy/CL.gs*.12,.35,.6),arc:CL.gs*(.22+.18*dy/CL.step)};
   }
   function placeClimb(r){
