@@ -1,11 +1,23 @@
 /* Danh sach gift code Where Winds Meet - con han
  * Nguon: https://codes.yar.gg (danh sach do cong dong cap nhat)
- * Chup luc: 2026-10-23
+ * Chup luc: 2026-10-24
  */
 window.WWM_CODES = {
-  updated: '2026-10-23',
+  updated: '2026-10-24',
   source: { name: 'codes.yar.gg', url: 'https://codes.yar.gg/' },
   codes: [
+    { code: "WWMR3DD1T10", date: "10/24" },
+    { code: "HQMJ7EKRHH", date: "10/23" },
+    { code: "DDDN4RD7WD", date: "10/23" },
+    { code: "NJYQWK466M", date: "10/23" },
+    { code: "PCRMQ8X4RT", date: "10/23" },
+    { code: "SDDPRA8CRH", date: "10/23" },
+    { code: "QMEEECDED8", date: "10/23" },
+    { code: "PJHHNWADC3", date: "10/23" },
+    { code: "TE8CK6Y3XW", date: "10/23" },
+    { code: "WA66CJ6P6H", date: "10/23" },
+    { code: "RMTT6KDRHQ", date: "10/23" },
+    { code: "MT6QFCRPHN", date: "10/23" },
     { code: "MCTF7FMCTQ", date: "10/22" },
     { code: "QSECW4P3AH", date: "10/22" },
     { code: "RCDKRMP8RM", date: "10/22" },
