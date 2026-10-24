@@ -748,7 +748,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       if(sp.goat){ // dê núi: sheet riêng, kích thước cố định nên không cần đo
         sp.added=true;
         const st=sp.getAnim(), a=GOAT_ANIMS[st.a]||GOAT_ANIMS.walk, f=Math.floor((t/1000+sp.phase)*a.fps)%4;
-        const row=sp.v*8+a.row*2+(st.d?1:0), key=row*10+f;
+        const row=sp.v*GOAT_ROWS+a.row*3+(st.d|0), key=row*10+f;
         if(key!==sp.f){sp.f=key; sp.el.style.backgroundPosition=`${(-(f*GOAT_STEP+1)*sp.k).toFixed(1)}px ${(-(row*GOAT_STEP+1)*sp.k).toFixed(1)}px`;}
         continue;
       }
@@ -782,14 +782,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     return el;
   }
   // Dê núi (mode climb): Sevarihk – Mountain Goat Sprites (CC-BY 4.0), ghép thành sprites/de-nui.png.
-  // Ô 63x63, bước 65 (viền trống 1px). 4 kiểu dê (trắng sừng to, trắng sừng nhỏ, nâu sừng to, nâu sừng nhỏ), mỗi kiểu 8 hàng:
-  // đi, nhảy, gặm cỏ, ngó nghiêng; mỗi động tác 2 hàng (quay trái, quay phải), 4 khung.
-  const GOAT_CELL=63, GOAT_STEP=65, GOAT_VARIANTS=4;
-  const GOAT_ANIMS={walk:{row:0,fps:8},jump:{row:1,fps:7},graze:{row:2,fps:4},look:{row:3,fps:3}};
-  // getAnim() trả về {a: tên động tác, d: 1 quay phải / 0 quay trái}
+  // Ô 63x63, bước 65 (viền trống 1px). 4 kiểu dê (trắng sừng to, trắng sừng nhỏ, nâu sừng to, nâu sừng nhỏ), mỗi kiểu 12 hàng:
+  // đi, nhảy, gặm cỏ, ngó nghiêng; mỗi động tác 3 hàng (quay trái, quay phải, quay lưng đi lên), 4 khung.
+  const GOAT_CELL=63, GOAT_STEP=65, GOAT_VARIANTS=4, GOAT_ROWS=12;
+  const GOAT_ANIMS={walk:{row:0,fps:6},jump:{row:1,fps:6},graze:{row:2,fps:4},look:{row:3,fps:3}};
+  // getAnim() trả về {a: tên động tác, d: 0 quay trái / 1 quay phải / 2 quay lưng đi lên}
   function goatSprite(v,size,getAnim){
     const el=document.createElement("div"), k=size/GOAT_CELL; el.className="gspr";
-    el.style.backgroundSize=`${(4*GOAT_STEP*k).toFixed(1)}px ${(GOAT_VARIANTS*8*GOAT_STEP*k).toFixed(1)}px`;
+    el.style.backgroundSize=`${(4*GOAT_STEP*k).toFixed(1)}px ${(GOAT_VARIANTS*GOAT_ROWS*GOAT_STEP*k).toFixed(1)}px`;
     sprites.add({el,getAnim,goat:true,v,k,phase:rnd()*10,f:-1,added:false});
     return el;
   }
@@ -1327,7 +1327,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     wrap.style.height=VH+"px";
     // ô sprite vuông, con dê chiếm khoảng 3/4 ô; màn rộng (desktop) thì dê to hơn
     const gs=Math.round((n<=10?60:n<=20?52:46)*clamp(Math.min(W/380,VH/520),1,1.6));
-    const TOP=150, CLIMB=Math.round(VH*(dur/15)*1.15), BASE=TOP+CLIMB, H=BASE+70, cx=W/2;
+    const TOP=150, CLIMB=Math.round(VH*(dur/15)*.9), BASE=TOP+CLIMB, H=BASE+70, cx=W/2;
     const ALT=dur<=15?900:dur<=30?1800:2800; // độ cao hiển thị (m)
     world.style.height=H+"px";
     // nửa bề ngang vách núi theo độ cao: hẹp ở đỉnh (bãi cỏ), loe ra dưới chân
@@ -1368,11 +1368,15 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     for(let k=1;k<=steps;k++) deco("alt",`${Math.round(k/steps*ALT)} m`,6,BASE-CLIMB*k/steps);
 
     const lanes=shuffle(goats.map((_,i)=>n>1?i/(n-1)*2-1:0));
-    CL={my,goats,players,W,VH,wrap,TOP,CLIMB,BASE,H,cx,hw,gs,ALT,zig:2+dur/15,cam:H-VH,bg:"",running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
+    CL={my,goats,players,W,VH,wrap,TOP,CLIMB,BASE,H,cx,hw,gs,ALT,zig:1+dur/30,cam:H-VH,bg:"",running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
     goats.forEach((r,i)=>{
       Object.assign(r,{p:0,base:between(.96,1.04)/dur,mult:1,target:1,retarget:0,state:"run",stateT:0,bubbleT:0,done:false,sp:"goat",
-        u:lanes[i]*.8,ph:rnd()*Math.PI*2,amp:between(.25,.45),oy:between(-.7,.7)*gs,oyEnd:between(-8,12),v:Math.floor(rnd()*GOAT_VARIANTS),dir:rnd()<.5?1:0,stallA:"look",zi:null});
-      world.appendChild(makeGoat(r,()=>({a:r.done?"graze":!CL.running?"look":r.state==="stall"?r.stallA:r.state==="sprint"?"jump":"walk",d:r.dir})));
+        u:lanes[i]*.8,ph:rnd()*Math.PI*2,amp:between(.04,.1),oy:between(-.7,.7)*gs,oyEnd:between(-8,12),v:Math.floor(rnd()*GOAT_VARIANTS),dir:2,side:rnd()<.5?1:0,stallA:"look",zi:null});
+      // leo thì quay lưng đi lên (dạt ngang nhiều mới quay nghiêng); đứng gặm cỏ, ngó nghiêng thì quay nghiêng cho thấy dáng
+      world.appendChild(makeGoat(r,()=>{
+        const a=r.done?"graze":!CL.running?"look":r.state==="stall"?r.stallA:r.state==="sprint"?"jump":"walk";
+        return {a,d:a==="graze"||a==="look"?r.side:r.dir};
+      }));
       placeClimb(r);
     });
     wrap.scrollTop=CL.cam; climbBg();
@@ -1396,7 +1400,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   function placeClimb(r){
     // oy: lệch dọc riêng từng con (chỉ để nhìn, không ảnh hưởng thắng thua) cho bầy tản ra thay vì dính thành một hàng
     const p=Math.min(r.p,1), y=CL.BASE-p*CL.CLIMB+r.oy*(1-p)+r.oyEnd*p, x=climbX(r,p);
-    if(!r.done&&CL.running){const dx=climbX(r,Math.min(1,p+.004))-x; if(Math.abs(dx)>.05) r.dir=dx>0?1:0;}
+    if(!r.done&&CL.running){
+      const slope=(climbX(r,Math.min(1,p+.004))-x)/(.004*CL.CLIMB); // px ngang trên mỗi px leo lên
+      if(Math.abs(slope)>.45) r.dir=r.side=slope>0?1:0; else if(Math.abs(slope)<.3) r.dir=2;
+    }
     r.el.style.transform=`translate(${(x-CL.gs/2).toFixed(1)}px,${(y-CL.gs*.9).toFixed(1)}px)`;
     const zi=10+Math.round(y/4); if(zi!==r.zi){r.zi=zi; r.el.style.zIndex=String(zi);} // con ở thấp hơn đứng trước
   }
