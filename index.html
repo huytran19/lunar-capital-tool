@@ -747,7 +747,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       if(!sp.el.isConnected){ if(sp.added) sprites.delete(sp); continue; }
       if(sp.goat){ // dê núi: sheet riêng, kích thước cố định nên không cần đo
         sp.added=true;
-        const st=sp.getAnim(), a=GOAT_ANIMS[st.a]||GOAT_ANIMS.walk, f=Math.floor((t/1000+sp.phase)*a.fps)%4;
+        const st=sp.getAnim(), a=GOAT_ANIMS[st.a]||GOAT_ANIMS.walk, f=st.f!=null?st.f:Math.floor((t/1000+sp.phase)*a.fps)%4;
         const row=sp.v*GOAT_ROWS+a.row*3+(st.d|0), key=row*10+f;
         if(key!==sp.f){sp.f=key; sp.el.style.backgroundPosition=`${(-(f*GOAT_STEP+1)*sp.k).toFixed(1)}px ${(-(row*GOAT_STEP+1)*sp.k).toFixed(1)}px`;}
         continue;
@@ -785,8 +785,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   // Ô 63x63, bước 65 (viền trống 1px). 4 kiểu dê (trắng sừng to, trắng sừng nhỏ, nâu sừng to, nâu sừng nhỏ), mỗi kiểu 12 hàng:
   // đi, nhảy, gặm cỏ, ngó nghiêng; mỗi động tác 3 hàng (quay trái, quay phải, quay lưng đi lên), 4 khung.
   const GOAT_CELL=63, GOAT_STEP=65, GOAT_VARIANTS=4, GOAT_ROWS=12;
-  const GOAT_ANIMS={walk:{row:0,fps:6},jump:{row:1,fps:6},graze:{row:2,fps:4},look:{row:3,fps:3}};
-  // getAnim() trả về {a: tên động tác, d: 0 quay trái / 1 quay phải / 2 quay lưng đi lên}
+  const GOAT_ANIMS={walk:{row:0,fps:6},stand:{row:0,fps:0},jump:{row:1,fps:6},graze:{row:2,fps:4},look:{row:3,fps:3}};
+  // getAnim() trả về {a: tên động tác, d: 0 quay trái / 1 quay phải / 2 quay lưng đi lên, f: khung cố định (không bắt buộc)}
   function goatSprite(v,size,getAnim){
     const el=document.createElement("div"), k=size/GOAT_CELL; el.className="gspr";
     el.style.backgroundSize=`${(4*GOAT_STEP*k).toFixed(1)}px ${(GOAT_VARIANTS*GOAT_ROWS*GOAT_STEP*k).toFixed(1)}px`;
@@ -1368,14 +1368,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     for(let k=1;k<=steps;k++) deco("alt",`${Math.round(k/steps*ALT)} m`,6,BASE-CLIMB*k/steps);
 
     const lanes=shuffle(goats.map((_,i)=>n>1?i/(n-1)*2-1:0));
-    CL={my,goats,players,W,VH,wrap,TOP,CLIMB,BASE,H,cx,hw,gs,ALT,zig:1+dur/30,cam:H-VH,bg:"",running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
+    CL={my,goats,players,W,VH,wrap,TOP,CLIMB,BASE,H,cx,hw,gs,ALT,step:gs*.9,cam:H-VH,bg:"",running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
     goats.forEach((r,i)=>{
-      Object.assign(r,{p:0,base:between(.96,1.04)/dur,mult:1,target:1,retarget:0,state:"run",stateT:0,bubbleT:0,done:false,sp:"goat",
-        u:lanes[i]*.8,ph:rnd()*Math.PI*2,amp:between(.04,.1),oy:between(-.7,.7)*gs,oyEnd:between(-8,12),v:Math.floor(rnd()*GOAT_VARIANTS),dir:2,side:rnd()<.5?1:0,stallA:"look",zi:null});
-      // leo thì quay lưng đi lên (dạt ngang nhiều mới quay nghiêng); đứng gặm cỏ, ngó nghiêng thì quay nghiêng cho thấy dáng
+      Object.assign(r,{p:0,base:between(.96,1.04)/dur,mult:1,target:1,retarget:0,state:"run",stateT:0,bubbleT:0,done:false,landed:false,sp:"goat",
+        u:lanes[i]*.8,ox:0,oy:between(-.7,.7)*gs,oyEnd:between(-8,12),v:Math.floor(rnd()*GOAT_VARIANTS),dir:2,side:rnd()<.5?1:0,stallA:"look",hop:null,zi:null});
+      r.hy=climbY(r,0); r.hx=laneX(r,r.hy);
+      // nhảy thì quay lưng bật lên (cú nào lệch ngang nhiều mới quay nghiêng); đứng chờ quay lưng; gặm cỏ, ngó nghiêng thì quay nghiêng
       world.appendChild(makeGoat(r,()=>{
-        const a=r.done?"graze":!CL.running?"look":r.state==="stall"?r.stallA:r.state==="sprint"?"jump":"walk";
-        return {a,d:a==="graze"||a==="look"?r.side:r.dir};
+        if(r.hop) return {a:"jump",d:r.dir,f:Math.min(3,Math.floor(r.hop.k*4))};
+        const a=r.done?"graze":!CL.running?"look":r.state==="stall"?r.stallA:"stand";
+        return {a,d:a==="stand"?2:r.side};
       }));
       placeClimb(r);
     });
@@ -1395,17 +1397,27 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     }
     r.el=root; return root;
   }
-  // đường leo zíc zắc: mỗi con một làn u (-1..1) cộng sóng sin theo quãng đã leo, ép vào bề ngang vách ở độ cao đó
-  function climbX(r,p){return CL.cx+CL.hw(CL.BASE-p*CL.CLIMB)*.82*clamp(r.u+r.amp*Math.sin(r.ph+p*CL.zig*Math.PI*2),-1,1);}
+  // Độ cao ứng với quãng p; oy là lệch dọc riêng từng con cho bầy tản ra thay vì dính thành một hàng.
+  // Làn u (-1..1) giữ mỗi con một vệt trên vách. Mấy thứ này và các cú nhảy chỉ để nhìn, thắng thua chỉ theo p.
+  function climbY(r,p){return CL.BASE-p*CL.CLIMB+r.oy*(1-p)+r.oyEnd*p;}
+  function laneX(r,y){return CL.cx+CL.hw(y)*.82*r.u;}
+  // Dê núi leo bằng từng cú bật: p đi trước, đủ một quãng nhảy thì bật một cú tới độ cao đó (bứt tốc thì cú dài hơn),
+  // đáp xuống đứng lấy đà rồi nhảy cú sau. Mỗi cú chỉ lệch ngang một chút quanh làn của nó.
+  function hopTick(r,dt){
+    if(r.hop){ r.hop.k+=dt/r.hop.T; if(r.hop.k<1) return; r.hx=r.hop.x1; r.hy=r.hop.y1; r.hop=null; }
+    const gap=r.hy-climbY(r,Math.min(r.p,1));
+    if(gap<CL.step&&!(r.p>=1&&gap>.5)) return;
+    const dy=Math.min(gap,CL.step*2.2), y1=r.hy-dy, half=CL.hw(y1)*.9;
+    r.ox=clamp(r.ox*.5+between(-.6,.6)*CL.gs,-CL.gs,CL.gs);
+    const x1=clamp(laneX(r,y1)+r.ox,CL.cx-half,CL.cx+half), dx=x1-r.hx;
+    if(Math.abs(dx)<dy*.45) r.dir=2; else r.dir=r.side=dx>0?1:0;
+    r.hop={x0:r.hx,y0:r.hy,x1,y1,k:0,T:clamp(.32+dy/CL.gs*.12,.35,.6),arc:CL.gs*(.22+.18*dy/CL.step)};
+  }
   function placeClimb(r){
-    // oy: lệch dọc riêng từng con (chỉ để nhìn, không ảnh hưởng thắng thua) cho bầy tản ra thay vì dính thành một hàng
-    const p=Math.min(r.p,1), y=CL.BASE-p*CL.CLIMB+r.oy*(1-p)+r.oyEnd*p, x=climbX(r,p);
-    if(!r.done&&CL.running){
-      const slope=(climbX(r,Math.min(1,p+.004))-x)/(.004*CL.CLIMB); // px ngang trên mỗi px leo lên
-      if(Math.abs(slope)>.45) r.dir=r.side=slope>0?1:0; else if(Math.abs(slope)<.3) r.dir=2;
-    }
+    let x=r.hx, y=r.hy, base=y;
+    if(r.hop){const h=r.hop, k=h.k; x=h.x0+(h.x1-h.x0)*k; base=h.y0+(h.y1-h.y0)*k; y=base-Math.sin(Math.PI*k)*h.arc;}
     r.el.style.transform=`translate(${(x-CL.gs/2).toFixed(1)}px,${(y-CL.gs*.9).toFixed(1)}px)`;
-    const zi=10+Math.round(y/4); if(zi!==r.zi){r.zi=zi; r.el.style.zIndex=String(zi);} // con ở thấp hơn đứng trước
+    const zi=10+Math.round(base/4); if(zi!==r.zi){r.zi=zi; r.el.style.zIndex=String(zi);} // con ở thấp hơn đứng trước
   }
   // núi xa chìm dần khi camera lên cao
   function climbBg(){
@@ -1417,7 +1429,12 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     CL.t+=dt;
     const avg=CL.goats.reduce((s,r)=>s+r.p,0)/CL.goats.length;
     for(const r of CL.goats){
-      if(r.done) continue;
+      if(r.done){ // đã tới đích theo p nhưng có thể còn đang nhảy những cú cuối lên bãi cỏ
+        if(r.landed) continue;
+        tickBubble(r,dt); hopTick(r,dt); placeClimb(r);
+        if(!r.hop&&r.hy-climbY(r,1)<=.5) r.landed=true;
+        continue;
+      }
       r.retarget-=dt; r.stateT-=dt; tickBubble(r,dt);
       if(r.retarget<=0){r.target=between(.6,1.45);r.retarget=between(.3,.8);}
       if(r.state!=="run"&&r.stateT<=0) r.state="run";
@@ -1438,7 +1455,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
           if(!CL.winner){CL.winner=r;CL.finishedAt=CL.t;say(r,line(r,"win"),2.5);honk(1.6);honk(1.6,.28);$("status6").textContent=`🏆 ${r.name} lên đỉnh đầu tiên!`;}
         }
       }
-      placeClimb(r);
+      hopTick(r,dt); placeClimb(r);
     }
     let leader=CL.players[0]; for(const r of CL.players) if(r.p>leader.p) leader=r;
     if(!CL.crown){CL.crown=document.createElement("span"); CL.crown.className="crown"; CL.crown.textContent="👑";}
