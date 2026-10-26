@@ -735,6 +735,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
 <script>
 (function(){
+  const DS_HASH=location.hash; // đọc trước khi syncUrl() viết lại địa chỉ thành ?mode=… (mất phần #ds= của link /danhsach)
   const COLORS=["#E4572E","#2E86DE","#F2C230","#9B59B6","#17A589","#E84393","#34495E","#FF8C42","#6AB04C","#00B8D4","#C0392B","#8E6E53"];
   const TEAMS=[{name:"Đội Đỏ",color:"#E4572E",ic:"🔴"},{name:"Đội Xanh",color:"#2E86DE",ic:"🔵"},{name:"Đội Vàng",color:"#E0A800",ic:"🟡"},{name:"Đội Tím",color:"#9B59B6",ic:"🟣"}];
   const DEFAULT="Ngỗng Mập\nNgỗng Lì\nNgỗng Ù\nNgỗng Sún\nNgỗng Xám\nNgỗng Cắn";
@@ -1916,6 +1917,26 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   document.querySelectorAll("[data-discord]").forEach(b=>b.addEventListener("click",()=>sendDiscord(b)));
   document.querySelectorAll("[data-webhook]").forEach(b=>b.addEventListener("click",askWebhook));
   dcRefresh();
+
+  // Link từ lệnh /danhsach của bot: "#ds=" + base64url ("z" nén deflate-raw, "p" để nguyên). Nội dung: dòng đầu là ID role
+  // (hệ 36, có thể trống), mỗi dòng sau "Tên|ID hệ 36" hoặc chỉ "Tên". Giải ra đúng định dạng "Tên <@ID>" như khi copy dán.
+  async function dsLoad(hash){
+    const m=/^#ds=([zp])([A-Za-z0-9_-]+)$/.exec(hash); if(!m) return;
+    if(location.hash) try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){} // bỏ chuỗi dài trên thanh địa chỉ
+    try{
+      const b=atob(m[2].replace(/-/g,"+").replace(/_/g,"/")), bytes=Uint8Array.from(b,c=>c.charCodeAt(0));
+      const buf=m[1]==="z"?await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer():bytes;
+      const [role,...rows]=new TextDecoder().decode(buf).split("\n");
+      const id=s=>{let n=0n;for(const ch of s){const d=parseInt(ch,36);if(isNaN(d))throw new Error("ID hỏng");n=n*36n+BigInt(d);}return n.toString();};
+      const lines=rows.filter(Boolean).map(r=>{const i=r.lastIndexOf("|");return i<0?r:`${r.slice(0,i)} <@${id(r.slice(i+1))}>`;});
+      if(!lines.length) return;
+      ta.value=(role?`<@&${id(role)}>\n`:"")+lines.join("\n");
+      ta.dispatchEvent(new Event("input")); // lưu, đếm lại, cập nhật ô chọn cặp
+      ta.classList.remove("flash"); void ta.offsetWidth; ta.classList.add("flash");
+    }catch(e){$("err").textContent="Link danh sách bị hỏng. Copy khối chữ trong tin của bot rồi dán vào ô Danh sách nhé.";}
+  }
+  dsLoad(DS_HASH);
+  window.addEventListener("hashchange",()=>dsLoad(location.hash)); // tool đang mở sẵn trong tab mà bấm link mới
 
   /* ---------- Mode: Sinh tồn ---------- */
   // Mỗi con 100 máu, phát ngẫu nhiên một vũ khí (sát thương min–max, thời gian hồi đòn, tầm đánh).
