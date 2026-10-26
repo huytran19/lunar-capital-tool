@@ -496,6 +496,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 .cup-teams ol{margin:8px 0 0;padding-left:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 18px;font-size:14px}
 .cup-teams li small{display:block;color:var(--muted)}
 
+/* Gửi kết quả lên Discord qua webhook (URL chỉ lưu localStorage máy này) */
+.dc-row{display:flex;gap:8px;grid-column:1/-1}
+.discord{appearance:none;flex:1;border:0;border-radius:14px;padding:12px 14px;background:#5865F2;color:#fff;font-weight:800;font-size:15px;box-shadow:0 6px 20px rgba(88,101,242,.35)}
+.discord:hover{filter:brightness(1.08)}
+.discord:disabled{opacity:.6;cursor:default}
+.discord.ok{background:#3BA55D}
+.discord.bad{background:#ED4245}
+.dc-gear{appearance:none;border:2px solid var(--line);background:transparent;border-radius:14px;width:52px;font-size:18px}
 .bubble.left{left:auto;right:88%}
 .mode-team .bubble.left,.mode-arena .bubble.left,.ring .bubble.left,.mother .bubble.left{right:60%}
 </style>
@@ -649,6 +657,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       <button class="ghost" id="copyTeam">Sao chép kết quả</button>
       <button class="ghost" id="teamToCup">🏆 Tạo bảng đấu từ các đội này</button>
       <button class="ghost" data-edit>Sửa danh sách</button>
+      <div class="dc-row"><button class="discord" data-discord>📣 Gửi lên Discord</button><button class="dc-gear" data-webhook title="Đổi hoặc gỡ webhook Discord" aria-label="Cài webhook Discord">⚙️</button></div>
     </div>
   </section>
 
@@ -710,6 +719,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       <button class="ghost" id="removeWin">Loại, chơi tiếp</button>
       <button class="ghost" id="copyRes">Sao chép kết quả</button>
       <button class="ghost" data-edit>Sửa danh sách</button>
+      <div class="dc-row"><button class="discord" data-discord>📣 Gửi lên Discord</button><button class="dc-gear" data-webhook title="Đổi hoặc gỡ webhook Discord" aria-label="Cài webhook Discord">⚙️</button></div>
     </div>
   </section>
 </main>
@@ -1337,7 +1347,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   /* ---------- Result screen (dùng chung) ---------- */
   let RES=null;
   function showResult(cfg){
-    RES=cfg;
+    RES=cfg; dcReset();
     const tint=colorful&&cfg.tint!==false?cfg.color:null;
     const wg=$("winGoose"); wg.innerHTML=""; wg.className="g"+(cfg.baby&&!tint&&(cfg.sp||"goose")==="goose"?" baby":"");
     if(cfg.goat){const g=goatSprite(cfg.goat.v,128,()=>({a:"graze",d:1}));g.style.cssText+=";position:absolute;left:16px;top:0;width:128px;height:128px";wg.appendChild(g);}
@@ -1796,12 +1806,96 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     $("status2").textContent="Chia đội xong! 🎉";
     addHistory({mode:"team",herd,n:T.racers.length,teams:T.gates.map(g=>({name:g.name,ic:g.ic,members:g.members.map(r=>r.name)}))});
     honk(1.2);honk(1.2,.25);
-    $("teamActions").hidden=false;
+    dcReset(); $("teamActions").hidden=false;
   }
   $("againTeam").addEventListener("click",go);
   $("copyTeam").addEventListener("click",e=>{
     copyText(T.gates.map(g=>`${g.ic} ${g.name} (${g.members.length}):\n`+g.members.map(r=>"- "+r.name).join("\n")).join("\n\n"),e.currentTarget);
   });
+
+  /* ---------- Gửi kết quả lên Discord ---------- */
+  // Webhook URL chỉ lưu localStorage của máy host (repo public, không được ghi vào code).
+  // Máy chưa dán URL thì chỉ thấy nút "Kết nối Discord", không gửi được.
+  const DC_KEY="dua-ngong-webhook", SITE="https://huytran19.github.io/lunar-capital-tool/", LOGO=SITE+"icons/logo-512.png";
+  const DC_RE=/^https:\/\/(?:(?:ptb|canary)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
+  const dcEsc=s=>String(s).replace(/([\\*_~`|>#])/g,"\\$1"); // tên có * _ ~ … không làm vỡ định dạng
+  const dcCut=(s,max)=>s.length>max?s.slice(0,max-1)+"…":s;
+  function dcRefresh(){
+    const on=!!store.get(DC_KEY,"");
+    document.querySelectorAll("[data-discord]").forEach(b=>b.hidden=!on);
+    document.querySelectorAll("[data-webhook]").forEach(b=>{b.textContent=on?"⚙️":"🔗 Kết nối Discord";b.style.flex=on?"":"1";});
+  }
+  function dcReset(){document.querySelectorAll("[data-discord]").forEach(b=>{b.disabled=false;b.className="discord";b.textContent="📣 Gửi lên Discord";});dcRefresh();}
+  function askWebhook(){
+    const cur=store.get(DC_KEY,"");
+    let v=prompt("Dán Webhook URL của kênh Discord muốn đăng kết quả.\n\nLấy ở: Discord → Sửa kênh → Tích hợp (Integrations) → Webhooks → Tạo webhook → Sao chép URL.\nURL chỉ lưu trên máy này."+(cur?"\n\nXoá trống rồi bấm OK để gỡ webhook.":""),cur);
+    if(v===null) return "";
+    v=v.trim();
+    if(!v){store.set(DC_KEY,""); dcRefresh(); return "";}
+    if(!DC_RE.test(v)){alert("URL không đúng dạng webhook Discord (https://discord.com/api/webhooks/…).");return "";}
+    store.set(DC_KEY,v); dcRefresh(); return v;
+  }
+  const pickOne=a=>a[Math.floor(Math.random()*a.length)]; // chỉ để chọn câu chữ, không dùng rnd() của ván
+  function dcEmbed(){
+    const ts=new Date().toISOString(), base={url:SITE+"?mode="+mode,thumbnail:{url:LOGO},footer:{text:"Lunar Capital Tool · huytran19.github.io/lunar-capital-tool",icon_url:LOGO},timestamp:ts};
+    if(mode==="team"&&T){
+      const n=T.racers.length, K=T.gates.length;
+      const fields=T.gates.map(g=>({name:`${g.ic} ${g.name} (${g.members.length})`,value:dcCut(g.members.map(r=>dcEsc(r.name)).join(", ")||"—",1024)}));
+      const pr=k=>pairs[k].map(p=>dcEsc(p[0])+" + "+dcEsc(p[1])).join(" · ");
+      if(pairs.stick.length) fields.push({name:"🔗 Dính nhau",value:dcCut(pr("stick"),1024),inline:true});
+      if(pairs.apart.length) fields.push({name:"🚫 Không chung chuồng",value:dcCut(pr("apart"),1024),inline:true});
+      return {...base,title:"🌕 LUNAR CAPITAL · CHIA TEAM",color:0x4A5A92,
+        description:pickOne([`**${n}** người được lùa vào **${K}** chuồng, đều sĩ số, không ai được chọn đồng đội 😈`,
+          `Cả đàn **${n}** con ${noun()} chạy loạn một hồi rồi tự chui vào **${K}** chuồng. Số phận đã an bài 🌙`,
+          `**${K}** đội, **${n}** người, không mặc cả, không đổi chỗ. Trăng đã chia thì cứ thế mà chiến ⚔️`]),
+        fields:fields.concat([{name:"​",value:pickOne(["*Chúc các đội chiến vui!* ⚔️","*Thua thì đừng đổ tại con "+noun()+" nha* 😆","*Đội nào thắng nhớ khao cả guild* 🍗"])}])};
+    }
+    if(!RES) return null;
+    const name=dcEsc(RES.name);
+    if(mode==="pass"&&R){
+      const pct=Math.round((R.power||0)*100), laps=R.laps||0, prize=dcEsc(prizeName());
+      const fields=[{name:"🏆 Người thắng",value:`**${name}**`,inline:true},{name:"🎁 Giải thưởng",value:prize,inline:true},{name:"👥 Tham gia",value:`${R.k} người`,inline:true},
+        {name:"💪 Lực quay",value:`${pct}% · ${laps} vòng`,inline:true}];
+      if(R.skipped) fields.push({name:"🚫 Né người thắng lần trước",value:dcEsc(R.skipped),inline:true});
+      fields.push({name:`🗨️ Lời con ${noun()}`,value:`"${line(R.goose,"passWin")}"`});
+      fields.push({name:"​",value:`*Chúc mừng ${name}! Liên hệ quản lý guild để nhận ${prize} nhé* 🎉`});
+      return {...base,title:"🌕 LUNAR CAPITAL · VÒNG QUAY MAY MẮN",color:0xF3D98B,
+        description:pickOne([`Đêm nay trăng tròn, con ${noun()} đã chạy **${laps} vòng** quanh bàn quay với **lực ${pct}%**… và dừng lại trước một cái tên 👀`,
+          `Lệnh bài được giữ tới **${pct}%** lực, bàn quay xoay **${laps} vòng** chóng cả mặt. Khi mọi thứ đứng yên, chỉ còn một người được chọn ✨`,
+          `**${R.k}** người nín thở. Con ${noun()} chạy **${laps} vòng**, chậm dần, chậm dần… rồi dừng lại 🌙`]),fields};
+    }
+    const order=RES.order||[], n=order.length, climb=mode==="climb";
+    const podium=order.slice(0,3).map((r,i)=>["🥇","🥈","🥉"][i]+" "+(i?dcEsc(r.name):`**${dcEsc(r.name)}**`)).join("\n");
+    const fields=[{name:climb?"⛰️ Lên đỉnh":"🏁 Bục vinh quang",value:podium||"—"}];
+    if(n>3) fields.push({name:`4–${Math.min(10,n)}`,value:dcCut(order.slice(3,10).map(r=>dcEsc(r.name)).join(" · "),1024)});
+    if(n>3) fields.push({name:climb?"🧗 Còn ở chân núi":"🐢 Về chót",value:`${dcEsc(order[n-1].name)} (lần sau cố lên!)`,inline:true});
+    fields.push({name:"⏱️ "+(climb?"Đường leo":"Đường đua"),value:`~${dur} giây · ${n} con`,inline:true});
+    fields.push({name:"​",value:`*${name} ${climb?"chinh phục đỉnh núi":"ẵm giải"}, chúc mừng!* 🎉`});
+    return {...base,title:climb?"🌕 LUNAR CAPITAL · DÊ LEO NÚI":"🌕 LUNAR CAPITAL · ĐUA "+noun().toUpperCase(),color:climb?0x9B7BB8:0x6AB04C,
+      description:climb?pickOne([`**${n}** con dê bật nhảy lên vách đá, cú nào cũng xéo 45° như sách giáo khoa. Đứa đầu tiên đặt chân lên bãi cỏ trên đỉnh là…`,
+          `Núi cao, gió lạnh, cỏ trên đỉnh thì ngon. **${n}** con dê cùng leo, chỉ một con được ăn trước 🐐`])
+        :pickOne([`**${n}** con ${noun()} xuất phát, đường đua ~${dur} giây. Cả đàn chen nhau, có con lạc đường, có con đứng hóng gió… nhưng chỉ một con về nhất!`,
+          `Còi vừa thổi, **${n}** con ${noun()} lao đi như bão. Có con bứt tốc, có con dừng lại tám chuyện… và đây là kết quả 🏁`,
+          `Trăng lên, đường đua ~${dur} giây, **${n}** con ${noun()} và một chiếc cúp. Ai nhanh chân hơn? 🌙`]),fields};
+  }
+  async function sendDiscord(btn){
+    let url=store.get(DC_KEY,""); if(!url&&!(url=askWebhook())) return;
+    const embed=dcEmbed(); if(!embed) return;
+    btn.disabled=true; btn.textContent="Đang gửi…";
+    let ok=false, msg="";
+    try{
+      const r=await fetch(url+"?wait=true",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({username:"Lunar Capital",avatar_url:LOGO,embeds:[embed],allowed_mentions:{parse:[]}})});
+      ok=r.ok;
+      if(!ok) msg=r.status===404||r.status===401?"Webhook không còn, bấm ⚙️ dán lại":r.status===429?"Gửi nhanh quá, đợi chút":`Discord báo lỗi ${r.status}`;
+    }catch(e){msg="Không gửi được, kiểm tra mạng";}
+    if(ok){btn.className="discord ok";btn.textContent="✓ Đã gửi lên Discord";return;} // giữ khoá để khỏi gửi trùng
+    btn.className="discord bad"; btn.textContent=msg;
+    setTimeout(()=>{btn.disabled=false;btn.className="discord";btn.textContent="📣 Gửi lại lên Discord";},2500);
+  }
+  document.querySelectorAll("[data-discord]").forEach(b=>b.addEventListener("click",()=>sendDiscord(b)));
+  document.querySelectorAll("[data-webhook]").forEach(b=>b.addEventListener("click",askWebhook));
+  dcRefresh();
 
   /* ---------- Mode: Sinh tồn ---------- */
   // Mỗi con 100 máu, phát ngẫu nhiên một vũ khí (sát thương min–max, thời gian hồi đòn, tầm đánh).
@@ -2180,7 +2274,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     makeGoose(runner,()=>R.speed>5?"flap":R.speed>1.4?"run":R.speed>.15?"walk":"idle");
     runner.el.style.width=gw+"px"; runner.el.style.height=gh+"px";
     host.appendChild(runner.el);
-    R={my,items,k,seg,track,P,gw,gh,goose:runner,seats,slices,cands,a:a0,a0,targetA:0,total:0,TT:1,t:0,speed:0,win:-1,cur:-1,done:false,
+    R={my,items,k,seg,track,P,gw,gh,goose:runner,seats,slices,cands,skipped:cands.length<k?lastWin:"",a:a0,a0,targetA:0,total:0,TT:1,t:0,speed:0,win:-1,cur:-1,done:false,
        tok,pw,holding:false,holdT:0,pressure:0,power:0,spun:false};
     placeRing(R.a,track);
     $("status5").textContent=`Nhấn giữ ${prizeName()} để lấy đà, thả tay là quay. Giữ càng lâu quay càng dữ.`;
@@ -2215,7 +2309,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     R.win=pick(R.cands);
     R.targetA=R.slices?R.win*R.seg+R.seg/2+between(-.3,.3)*R.seg:R.win*R.seg;
     // nhấn nhẹ nhất: 7-9 vòng, mạnh nhất: 15-17 vòng (phần lẻ bốc ngẫu nhiên)
-    const laps=7+Math.round(p*8)+Math.floor(rnd()*3);
+    const laps=7+Math.round(p*8)+Math.floor(rnd()*3); R.laps=laps; // giữ lại cho tin Discord
     R.total=laps*2*Math.PI+(((R.targetA-R.a0)%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
     R.TT=9+laps*.7+between(-.8,.8);
     R.tok.classList.remove("armed"); R.tok.style.transform=""; R.tok.disabled=true;

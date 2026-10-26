@@ -79,8 +79,13 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Dê Leo Núi, Vòng quay 
 - Ảnh xem trước 1200x630 ở `og/` (`home.jpg` cho trang chính, `<mode>.jpg` cho từng link). Tạo bằng Playwright: chụp khu vực chơi giữa ván rồi ghép với tiêu đề. Đổi giao diện nhiều thì chụp lại.
 - Discord lưu thẻ xem trước khá lâu, sửa ảnh xong có thể phải chờ hoặc thêm `?v=2` vào link.
 
+## Gửi kết quả lên Discord (2026-10-26)
+- Webhook URL chỉ lưu localStorage `dua-ngong-webhook` của máy host, **không bao giờ ghi vào code** (repo public). Máy chưa có URL chỉ thấy nút "🔗 Kết nối Discord" (dán URL qua `prompt`, kiểm tra dạng `DC_RE`); có URL thì hiện "📣 Gửi lên Discord" + ⚙️ để đổi/gỡ (xoá trống = gỡ).
+- Nút ở màn kết quả (Đua Ngỗng, Dê Leo Núi, Vòng quay) và màn Chia team. Gửi xong khoá nút tới ván sau (`dcReset` trong `showResult`/`teamDone`) để khỏi gửi trùng.
+- Tin là embed dài (người dùng đã chốt mẫu): tiêu đề "🌕 LUNAR CAPITAL · …", lời dẫn ngẫu nhiên, các mục (Vòng quay: người thắng, giải, số người, lực + số vòng `R.laps`, người bị né `R.skipped`, lời con thú; Đua/Dê: bục 3, hạng 4–10, về chót, độ dài; Chia team: từng đội + cặp dính/cấm), câu chúc, logo, chân trang + giờ. `allowed_mentions` rỗng nên không ping ai. Tên được escape markdown (`dcEsc`).
+- Thử bằng cách thay `window.fetch` để bắt payload, đừng gửi lên kênh thật.
+
 ## Việc tiếp theo đã bàn
-- Nút gửi kết quả lên Discord qua Webhook (URL webhook chỉ lưu localStorage trên máy host, không ghi vào code). Chỉ chạy được trên bản GitHub Pages.
 - Có thể làm sau: Discord Activity, vé nhiều suất.
 
 ## Gift code (`gift-code/`)
