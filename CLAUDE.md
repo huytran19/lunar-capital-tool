@@ -87,4 +87,5 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Dê Leo Núi, Vòng quay 
 - Trang tra gift code Where Winds Meet, gộp từ repo `wwm-codes` cũ ngày 2026-10-04 (repo cũ giờ chỉ chuyển hướng sang đây). Trang tĩnh riêng, không dính `index.html` chính; nút 🎁 trên thanh trên trỏ tới, trang gift code có link "← Lunar Capital" quay về.
 - Danh sách code ở `gift-code/js/codes-data.js`, lấy từ API `https://codes.yar.gg/api/codes`. `node gift-code/scripts/update-codes.js [--push]` cập nhật file (thêm `--push` thì commit riêng file đó, pull --rebase rồi push).
 - launchd `com.huytran.wwm-codes.update` (~/Library/LaunchAgents) chạy `--push` lúc 12:00 mỗi ngày, log ở `gift-code/logs/` (đã gitignore).
+- Giao diện (2026-10-26): cùng bảng màu đêm trăng với trang chính (navy, accent vàng `--accent` với chữ tối `--accent-ink`, trời sao `body::before`, trăng `body::after`), dùng chung `css/style.css` với trang hướng dẫn. Nút mỗi code tô màu riêng qua biến `--c`: Copy `--c-copy` (xanh ngọc), ✓ `--c-mark` (tím), ↺ khi đã dùng `--c-undo` (cam).
 - Tiến trình "đã dùng" lưu localStorage của trang gift code; cùng origin `huytran19.github.io` nên người dùng cũ vẫn giữ tiến trình.
