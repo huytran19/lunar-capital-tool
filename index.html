@@ -63,7 +63,7 @@ body::after{content:"";position:absolute;top:-96px;right:0;width:190px;height:19
     radial-gradient(circle at 34% 30%,var(--moon-a),var(--moon-b) 55%,var(--moon-c));
   box-shadow:0 0 50px 8px var(--glow),0 0 160px 50px rgba(120,140,255,.10);
   transition:opacity .4s,transform .4s}
-body.in-game::after{opacity:0;transform:translate(40px,-40px)}
+body.in-game::after{opacity:0;transform:translateY(-50px) scale(.85)} /* không trượt sang phải: sẽ tạo thanh cuộn ngang */
 :root[data-theme="light"] body::before{opacity:0;animation:none}
 @media (min-width:700px){body::after{width:300px;height:300px;top:-90px;right:0}}
 @media (prefers-reduced-motion: reduce){body::before{animation:none}}
@@ -89,7 +89,8 @@ body.in-game::after{opacity:0;transform:translate(40px,-40px)}
 #screen-setup .modes button[aria-pressed="true"] small{color:inherit;opacity:.75}
 .mode-desc{position:relative;padding:14px 16px 16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(243,217,139,.10),transparent 55%),var(--card);overflow:hidden}
 .mode-desc::before{content:"";position:absolute;right:-26px;top:-26px;width:90px;height:90px;border-radius:50%;box-shadow:-14px 10px 0 0 var(--accent);opacity:.18}
-#screen-setup h1{font-size:clamp(28px,8vw,40px);line-height:1.05;margin:0 0 8px}
+/* chữ chuyển màu chỉ tô trong khung chữ: chừa đệm trên cho dấu chồng (ỗ, ề) của Baloo 2 khỏi bị cắt thành "ngông" */
+#screen-setup h1{font-size:clamp(28px,8vw,40px);line-height:1.12;padding-top:.22em;margin:-.22em 0 8px}
 .opts{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:16px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
 .opts .seg{background:var(--bg)}
 .opts .box{background:var(--bg)}
@@ -103,7 +104,22 @@ body.in-game::after{opacity:0;transform:translate(40px,-40px)}
 .cta-bar .cta{width:100%}
 /* Desktop: màn chuẩn bị 2 cột, cột trái (chọn chế độ) dính trên khi cuộn cột phải */
 @media (min-width:980px){
-  body:not(.in-game) .app{max-width:1120px;padding:22px 32px 40px}
+  body .app{max-width:1120px;padding:22px 32px 40px} /* "body" để thắng .app gốc nằm sau trong file */
+  /* màn chơi và kết quả cũng dùng bề ngang desktop (sân đua, sân chia team đo bề ngang lúc bắt đầu ván) */
+  #screen-result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:auto 1fr;grid-template-areas:"win rank" "act rank";gap:16px 32px;align-items:start}
+  #screen-result .winner{grid-area:win;position:sticky;top:20px;padding:32px 24px 26px}
+  #screen-result .winner .g{width:200px;height:160px}
+  #screen-result .rank{grid-area:rank}
+  #screen-result .actions{grid-area:act;grid-template-columns:1fr 1fr;position:sticky;top:330px}
+  #screen-result .actions .cta{grid-column:1/-1}
+  body .rank li{padding:9px 16px}
+  body .teams{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  body .teams.three{grid-template-columns:repeat(3,1fr)}
+  #teamActions{grid-template-columns:repeat(4,1fr)}
+  #screen-history{max-width:760px;width:100%;margin:0 auto}
+  #screen-history .actions{grid-template-columns:repeat(3,1fr)}
+  body .ring{max-width:min(680px,calc(100vh - 170px))}
+  body .status{font-size:16px}
   #screen-setup{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:0 40px;align-items:start}
   #screen-setup .col-a{position:sticky;top:20px}
   #screen-setup h1{font-size:clamp(36px,3.6vw,52px)}
@@ -328,8 +344,15 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 .mother .spr{width:100%;height:100%;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 1px rgba(0,0,0,.6))}
 
 /* Ring (Ai bao + Vòng quay) */
-.ring{position:relative;width:100%;max-width:420px;aspect-ratio:1;margin:0 auto}
-.ring.pay{border-radius:50%;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 0 2px,transparent 3px) 0 0/28px 28px,var(--grass-a);border:3px solid var(--frame)}
+/* Vòng quay phong cách mặt trăng: to hết cỡ màn hình, mọi thứ (lệnh bài, vòng lực) đồng tâm */
+.ring{position:relative;width:100%;max-width:min(520px,calc(100vh - 210px));aspect-ratio:1;margin:0 auto}
+.ring.pay{border-radius:50%;border:4px solid #F3D98B;box-shadow:0 0 0 6px #141B3A,0 0 0 8px rgba(243,217,139,.55),0 0 40px rgba(243,217,139,.25);
+  background:radial-gradient(circle at 30% 34%,rgba(255,255,255,.07) 0 7%,transparent 7.5%),radial-gradient(circle at 70% 64%,rgba(255,255,255,.05) 0 10%,transparent 10.5%),radial-gradient(circle at 62% 26%,rgba(255,255,255,.05) 0 5%,transparent 5.5%),radial-gradient(circle at 40% 35%,#2C3870,#141B3A 75%)}
+.ring.slices{filter:drop-shadow(0 0 28px rgba(243,217,139,.22))}
+.ring svg.wheel .bulb{fill:#FFF6D8;animation:bulb 1.2s ease-in-out infinite alternate}
+.ring svg.wheel .bulb.b{animation-delay:-.6s}
+@keyframes bulb{from{opacity:.35}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.ring svg.wheel .bulb{animation:none}}
 .ring svg.wheel{position:absolute;inset:0;width:100%;height:100%}
 .ring svg.wheel text{font-family:"Be Vietnam Pro",sans-serif;font-weight:700;fill:#1b1b1b}
 .ring svg.wheel path.seg{transition:filter .15s}
@@ -350,27 +373,27 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 
 .text-in{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;font-size:16px;color:var(--ink)}
 .text-in:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.ring-token{position:absolute;left:50%;top:50%;width:19%;transform:translate(-50%,-58%);pointer-events:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
+.ring-token{position:absolute;left:50%;top:50%;width:19%;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
 .ring-token svg{display:block;width:100%;height:auto}
-.ring-token span{position:absolute;left:-60%;right:-60%;bottom:-16%;text-align:center;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(11px,3.2vw,15px);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap}
+.ring-token span{position:absolute;left:-60%;right:-60%;bottom:-12%;text-align:center;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(11px,3.2vw,15px);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap}
 
 button.ring-token{appearance:none;border:0;background:none;padding:0;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;z-index:3}
 button.ring-token:disabled{cursor:default}
 .ring-token.armed{pointer-events:auto;animation:tokpulse 1.4s ease-in-out infinite}
 @keyframes tokpulse{0%,100%{filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}50%{filter:drop-shadow(0 4px 0 rgba(0,0,0,.25)) drop-shadow(0 0 10px rgba(242,154,46,.9))}}
-.power{position:absolute;left:50%;top:50%;width:40%;aspect-ratio:1;transform:translate(-50%,-54%);border-radius:50%;pointer-events:none;z-index:2;
-  background:conic-gradient(#F29A2E calc(var(--p,0)*1turn),rgba(0,0,0,.18) 0);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));
-  opacity:.55;transition:opacity .2s}
-.power.on{opacity:1}
+/* Vòng lực: cung vàng chạy quanh lệnh bài, cùng tâm với vòng quay (JS đặt bề rộng theo tâm vòng quay) */
+.power{position:absolute;left:50%;top:50%;width:40%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;z-index:2;
+  background:conic-gradient(from 0deg,#FFF3C9,#F3D98B calc(var(--p,0)*.6turn),#FF9F43 calc(var(--p,0)*1turn),rgba(255,255,255,.13) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));
+  transition:opacity .2s,filter .2s}
+.power.on{filter:drop-shadow(0 0 8px rgba(255,190,90,.9))}
 .power.spent{opacity:0}
 @media (prefers-reduced-motion: reduce){.ring-token.armed{animation:none}}
 
 .ring.slices{border-radius:50%}
 .ring svg.wheel path.seg.skip{opacity:.4}
 .ring svg.wheel path.seg.win{stroke:#1b1b1b;stroke-width:3;filter:brightness(1.12)}
-.ring.slices .ring-token{width:17%}
-.ring.slices .power{width:30%}
+.ring.slices .ring-token{width:15%}
 
 .list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
 .list-head label{flex:1;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:700;font-size:15px}
@@ -2088,10 +2111,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const host=$("ring"); host.innerHTML=""; host.className="ring pay";
     const S=host.clientWidth, c=S/2, k=items.length, seg=2*Math.PI/k;
     const P=(a,r)=>[c+r*Math.sin(a),c-r*Math.cos(a)];
-    const gh=Math.round(clamp(S*.11,30,46)*(k>=15?.85:1)), gw=gh*1.25;
+    const gh=Math.round(clamp(S*.1,30,62)*(k>=15?.85:1)), gw=gh*1.25; // vòng to trên desktop thì con thú to theo
     // Ít người: ghế ngồi quanh sân. Đông người (15+): chia lát như vòng quay, con thú chạy trên vành.
     const slices=k>=15, seats=[];
-    let track, seatR=0;
+    let track, seatR=0, hubR=0;
     if(!slices){
       seatR=c-Math.max(30,S*.09);
       items.forEach((it,i)=>{
@@ -2121,16 +2144,21 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         text.textContent=it.name.length>maxCh?it.name.slice(0,maxCh-1)+"…":it.name;
         svg.appendChild(text);
       });
-      const band=document.createElementNS(NS,"circle");
-      band.setAttribute("cx",c); band.setAttribute("cy",c); band.setAttribute("r",outer+rim/2);
-      band.setAttribute("fill","none"); band.setAttribute("stroke","#1F2A16"); band.setAttribute("stroke-width",rim);
-      svg.appendChild(band);
-      const hub=document.createElementNS(NS,"circle"); hub.setAttribute("cx",c); hub.setAttribute("cy",c); hub.setAttribute("r",inner-2);
-      hub.setAttribute("fill","var(--grass-a)"); hub.setAttribute("stroke","#1F2A16"); hub.setAttribute("stroke-width","3"); svg.appendChild(hub);
+      // Viền navy kẹp giữa hai chỉ vàng, bóng đèn nhấp nháy xen kẽ; tâm navy viền vàng
+      const circ=(r,attrs)=>{const e=document.createElementNS(NS,"circle");e.setAttribute("cx",c);e.setAttribute("cy",c);e.setAttribute("r",r);Object.entries(attrs).forEach(([a,v])=>e.setAttribute(a,v));svg.appendChild(e);return e;};
+      circ(outer+rim/2,{fill:"none",stroke:"#141B3A","stroke-width":rim});
+      circ(outer+rim-1.5,{fill:"none",stroke:"#F3D98B","stroke-width":3});
+      circ(outer+1,{fill:"none",stroke:"#F3D98B","stroke-width":2.5});
+      const nb=Math.max(16,Math.round(2*Math.PI*(outer+rim/2)/34));
+      for(let b=0;b<nb;b++){const [bx,by]=P(b/nb*2*Math.PI,outer+rim/2),e=document.createElementNS(NS,"circle");
+        e.setAttribute("cx",bx);e.setAttribute("cy",by);e.setAttribute("r",Math.max(2.2,rim*.14));e.setAttribute("class","bulb"+(b%2?" b":""));svg.appendChild(e);}
+      circ(inner,{fill:"#141B3A",stroke:"#F3D98B","stroke-width":3});
+      circ(inner-7,{fill:"none",stroke:"rgba(243,217,139,.25)","stroke-width":1.5});
       host.appendChild(svg);
-      track=outer+rim*.5;
+      track=outer+rim*.5; hubR=inner;
     }
     const pw=document.createElement("div"); pw.className="power"; host.appendChild(pw);
+    if(hubR) pw.style.width=Math.round(2*hubR-10)+"px"; // vòng lực nằm sát trong mép tâm vòng quay
     const tok=document.createElement("button"); tok.className="ring-token armed"; tok.type="button";
     tok.setAttribute("aria-label",`Nhấn giữ ${prizeName()} để lấy đà, thả ra để quay`);
     tok.innerHTML=TOKEN_SVG+"<span></span>";
@@ -2168,7 +2196,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     if(R.holding) R.holdT+=dt;
     R.power=clamp(Math.max(R.holdT/2,R.pressure),0,1);
     const p=R.power, j=R.holding?(rnd()-.5)*p*10:0;
-    R.tok.style.transform=`translate(-50%,-58%) rotate(${j}deg) scale(${1+p*.1})`;
+    R.tok.style.transform=`translate(-50%,-50%) rotate(${j}deg) scale(${1+p*.1})`;
     R.pw.style.setProperty("--p",p.toFixed(3));
     R.pw.classList.toggle("on",R.holding);
     R.speed=R.holding?1.5+p*5:0; // con thú giậm chân tại chỗ theo lực
