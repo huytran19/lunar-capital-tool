@@ -1076,7 +1076,15 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   $("prize").addEventListener("input",()=>{store.set("dua-ngong-prize",$("prize").value);applyText();});
   // Tách theo dòng hoặc dấu phẩy (cả ，、 của tiếng Trung). Không tách theo khoảng trắng vì tên có dấu cách.
   // "Đội có sẵn" của Giải đấu giữ một dòng một đội vì dấu phẩy ngăn thành viên trong đội.
-  const parse=()=>ta.value.split(mode==="cup"&&cupBuild==="preset"?"\n":/\n|[,，、]/).map(s=>s.trim()).filter(Boolean);
+  // Danh sách từ lệnh /danhsach của bot: mỗi mục "Tên <@ID Discord>", dòng "<@&ID>" là role được ping khi có người trúng,
+  // dòng ``` là khung code bị copy kèm từ Discord. parse() chỉ trả tên; ID dùng khi gửi lên Discord (dcIds, dcRole).
+  const MENTION_RE=/<@!?(\d{15,22})>/, ROLE_RE=/^<@&(\d{15,22})>$/;
+  const parseRaw=()=>ta.value.split(mode==="cup"&&cupBuild==="preset"?"\n":/\n|[,，、]/).map(s=>s.trim()).filter(s=>s&&!s.startsWith("```")&&!ROLE_RE.test(s));
+  const nameOf=s=>s.replace(MENTION_RE,"").trim()||s;
+  const parse=()=>parseRaw().map(nameOf);
+  const dcIds=()=>new Map(parseRaw().map(s=>[nameOf(s),(MENTION_RE.exec(s)||[])[1]]).filter(e=>e[1]));
+  const dcRole=()=>{for(const s of ta.value.split(/\n|[,，、]/)){const m=ROLE_RE.exec(s.trim());if(m)return m[1];}return "";};
+  const roleLine=()=>{const r=dcRole();return r?`<@&${r}>\n`:"";}; // giữ dòng role khi viết lại danh sách
   // Tên trùng (không phân biệt hoa thường, khoảng trắng) làm kết quả mập mờ, nên chặn trước khi chơi
   const nameKey=s=>s.toLowerCase().replace(/\s+/g," ");
   function dupNames(items){
@@ -1095,7 +1103,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const items=parse(), max=MODE_INFO[mode].max, w=$("listWarn"), p=listProblem(items);
     const unit=mode==="survive"?"chiến binh":mode!=="cup"?`con ${noun()}`:cupBuild==="preset"?"đội":"người";
     $("count").textContent=(items.length>max?`${items.length}/${max} ${unit}`:`${items.length} ${unit}`)
-      +(mode==="cup"&&cupBuild==="random"&&items.length>1?` → ${cupTeamCount(items.length)} đội`:"");
+      +(mode==="cup"&&cupBuild==="random"&&items.length>1?` → ${cupTeamCount(items.length)} đội`:"")
+      +(()=>{const n=dcIds().size,r=dcRole();return n||r?` · 🔔 ${n} có ID${r?" + role":""}`:"";})();
     w.textContent=p; w.hidden=!p;
   }
 
@@ -1139,11 +1148,11 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   ta.addEventListener("input",()=>{$("err").textContent="";updateCount();store.set(listKey(),ta.value);refreshSelects();});
   // Xáo thứ tự tên bằng nguồn ngẫu nhiên mã hoá (dùng chung cho mọi mode)
   $("shuffleBtn").addEventListener("click",()=>{
-    const lines=parse(); // danh sách dấu phẩy được xếp lại thành mỗi dòng một tên
+    const lines=parseRaw(); // danh sách dấu phẩy được xếp lại thành mỗi dòng một tên (giữ ID Discord và dòng role)
     if(lines.length<2) return;
     const u=new Uint32Array(lines.length); crypto.getRandomValues(u);
     for(let i=lines.length-1;i>0;i--){const j=u[i]%(i+1);[lines[i],lines[j]]=[lines[j],lines[i]];}
-    ta.value=lines.join("\n"); store.set(listKey(),ta.value); updateCount(); refreshSelects();
+    ta.value=roleLine()+lines.join("\n"); store.set(listKey(),ta.value); updateCount(); refreshSelects();
     const btn=$("shuffleBtn"); btn.textContent="✓ Đã xáo"; ta.classList.remove("flash"); void ta.offsetWidth; ta.classList.add("flash");
     clearTimeout(btn._t); btn._t=setTimeout(()=>btn.textContent="🔀 Xáo thứ tự",1200);
   });
@@ -1366,9 +1375,9 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   $("copyRes").addEventListener("click",e=>{if(RES) copyText(RES.copy,e.currentTarget);});
   $("removeWin").addEventListener("click",()=>{
     if(!RES) return;
-    const lines=parse(), i=lines.indexOf(RES.name);
+    const lines=parseRaw(), i=lines.findIndex(s=>nameOf(s)===RES.name);
     if(i>-1) lines.splice(i,1);
-    ta.value=lines.join("\n"); store.set(listKey(),ta.value); updateCount();
+    ta.value=roleLine()+lines.join("\n"); store.set(listKey(),ta.value); updateCount();
     go();
   });
   const rankCopy=(title,order)=>title+"\n\nThứ tự:\n"+order.map((r,i)=>`${i+1}. ${r.name}`).join("\n");
@@ -1851,10 +1860,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         fields:fields.concat([{name:"​",value:pickOne(["*Chúc các đội chiến vui!* ⚔️","*Thua thì đừng đổ tại con "+noun()+" nha* 😆","*Đội nào thắng nhớ khao cả guild* 🍗"])}])};
     }
     if(!RES) return null;
-    const name=dcEsc(RES.name);
+    const name=dcEsc(RES.name), wid=dcIds().get(RES.name), tag=wid?` · <@${wid}>`:""; // mention trong embed chỉ hiện tên, không ping
     if(mode==="pass"&&R){
       const pct=Math.round((R.power||0)*100), laps=R.laps||0, prize=dcEsc(prizeName());
-      const fields=[{name:"🏆 Người thắng",value:`**${name}**`,inline:true},{name:"🎁 Giải thưởng",value:prize,inline:true},{name:"👥 Tham gia",value:`${R.k} người`,inline:true},
+      const fields=[{name:"🏆 Người thắng",value:`**${name}**${tag}`,inline:true},{name:"🎁 Giải thưởng",value:prize,inline:true},{name:"👥 Tham gia",value:`${R.k} người`,inline:true},
         {name:"💪 Lực quay",value:`${pct}% · ${laps} vòng`,inline:true}];
       if(R.skipped) fields.push({name:"🚫 Né người thắng lần trước",value:dcEsc(R.skipped),inline:true});
       fields.push({name:`🗨️ Lời con ${noun()}`,value:`"${line(R.goose,"passWin")}"`});
@@ -1865,7 +1874,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
           `**${R.k}** người nín thở. Con ${noun()} chạy **${laps} vòng**, chậm dần, chậm dần… rồi dừng lại 🌙`]),fields};
     }
     const order=RES.order||[], n=order.length, climb=mode==="climb";
-    const podium=order.slice(0,3).map((r,i)=>["🥇","🥈","🥉"][i]+" "+(i?dcEsc(r.name):`**${dcEsc(r.name)}**`)).join("\n");
+    const podium=order.slice(0,3).map((r,i)=>["🥇","🥈","🥉"][i]+" "+(i?dcEsc(r.name):`**${dcEsc(r.name)}**${tag}`)).join("\n");
     const fields=[{name:climb?"⛰️ Lên đỉnh":"🏁 Bục vinh quang",value:podium||"—"}];
     if(n>3) fields.push({name:`4–${Math.min(10,n)}`,value:dcCut(order.slice(3,10).map(r=>dcEsc(r.name)).join(" · "),1024)});
     if(n>3) fields.push({name:climb?"🧗 Còn ở chân núi":"🐢 Về chót",value:`${dcEsc(order[n-1].name)} (lần sau cố lên!)`,inline:true});
@@ -1878,6 +1887,17 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
           `Còi vừa thổi, **${n}** con ${noun()} lao đi như bão. Có con bứt tốc, có con dừng lại tám chuyện… và đây là kết quả 🏁`,
           `Trăng lên, đường đua ~${dur} giây, **${n}** con ${noun()} và một chiếc cúp. Ai nhanh chân hơn? 🌙`]),fields};
   }
+  // Ping chỉ chạy trong dòng chữ thường (mention trong embed không gửi thông báo): người trúng có ID + role trong danh sách.
+  // Chia team không có người trúng nên không ping ai. allowed_mentions chỉ mở đúng các ID này.
+  function dcPing(){
+    const none={allowed_mentions:{parse:[]}};
+    if(mode==="team"||!RES) return none;
+    const id=dcIds().get(RES.name), role=dcRole();
+    if(!id&&!role) return none;
+    const who=id?`<@${id}>`:`**${dcEsc(RES.name)}**`;
+    const what=mode==="pass"?`ẵm **${dcEsc(prizeName())}**`:mode==="climb"?"lên đỉnh núi đầu tiên":`về nhất Đua ${Noun()}`;
+    return {content:`${role?`<@&${role}> `:""}🎉 Chúc mừng ${who} ${what}!`,allowed_mentions:{parse:[],users:id?[id]:[],roles:role?[role]:[]}};
+  }
   async function sendDiscord(btn){
     let url=store.get(DC_KEY,""); if(!url&&!(url=askWebhook())) return;
     const embed=dcEmbed(); if(!embed) return;
@@ -1885,7 +1905,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     let ok=false, msg="";
     try{
       const r=await fetch(url+"?wait=true",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({username:"Lunar Capital",avatar_url:LOGO,embeds:[embed],allowed_mentions:{parse:[]}})});
+        body:JSON.stringify({username:"Lunar Capital",avatar_url:LOGO,embeds:[embed],...dcPing()})});
       ok=r.ok;
       if(!ok) msg=r.status===404||r.status===401?"Webhook không còn, bấm ⚙️ dán lại":r.status===429?"Gửi nhanh quá, đợi chút":`Discord báo lỗi ${r.status}`;
     }catch(e){msg="Không gửi được, kiểm tra mạng";}

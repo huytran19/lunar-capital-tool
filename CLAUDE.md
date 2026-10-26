@@ -84,6 +84,7 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Dê Leo Núi, Vòng quay 
 - Nút ở màn kết quả (Đua Ngỗng, Dê Leo Núi, Vòng quay) và màn Chia team. Gửi xong khoá nút tới ván sau (`dcReset` trong `showResult`/`teamDone`) để khỏi gửi trùng.
 - Tin là embed dài (người dùng đã chốt mẫu): tiêu đề "🌕 LUNAR CAPITAL · …", lời dẫn ngẫu nhiên, các mục (Vòng quay: người thắng, giải, số người, lực + số vòng `R.laps`, người bị né `R.skipped`, lời con thú; Đua/Dê: bục 3, hạng 4–10, về chót, độ dài; Chia team: từng đội + cặp dính/cấm), câu chúc, logo, chân trang + giờ. `allowed_mentions` rỗng nên không ping ai. Tên được escape markdown (`dcEsc`).
 - Thử bằng cách thay `window.fetch` để bắt payload, đừng gửi lên kênh thật.
+- **Ping người trúng + role**: lệnh `/danhsach` của discord-game-bot trả khối chữ mỗi dòng `Tên <@ID>`, dòng `<@&ID>` là role Ping. Tool: `parseRaw()` giữ nguyên mục (bỏ dòng ``` và dòng role), `parse()` chỉ trả tên, `dcIds()` map tên → ID, `dcRole()` lấy role. Xáo / "Loại, chơi tiếp" viết lại bằng `parseRaw()` + `roleLine()` để không mất ID. `dcPing()` đặt ping trong `content` (mention trong embed không gửi thông báo), `allowed_mentions` chỉ mở đúng người trúng + role; Chia team không ping.
 
 ## Việc tiếp theo đã bàn
 - Có thể làm sau: Discord Activity, vé nhiều suất.
