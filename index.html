@@ -504,7 +504,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     <div class="field-wrap">
       <div class="list-head"><label for="names"><b id="listLabel">Danh sách</b> <span id="count"></span></label>
         <button class="mini-btn" id="shuffleBtn" type="button">🔀 Xáo thứ tự</button></div>
-      <textarea id="names" spellcheck="false" placeholder="Mỗi dòng một tên"></textarea>
+      <textarea id="names" spellcheck="false" placeholder="Mỗi dòng một tên, hoặc cách nhau bằng dấu phẩy"></textarea>
       <p class="hint" id="listHint"></p>
       <p class="error" id="listWarn" aria-live="polite" hidden></p>
     </div>
@@ -1037,7 +1037,9 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   ta.value=store.get(listKey(),DEFAULT);
   $("prize").value=store.get("dua-ngong-prize","Battle Pass");
   $("prize").addEventListener("input",()=>{store.set("dua-ngong-prize",$("prize").value);applyText();});
-  const parse=()=>ta.value.split("\n").map(s=>s.trim()).filter(Boolean);
+  // Tách theo dòng hoặc dấu phẩy (cả ，、 của tiếng Trung). Không tách theo khoảng trắng vì tên có dấu cách.
+  // "Đội có sẵn" của Giải đấu giữ một dòng một đội vì dấu phẩy ngăn thành viên trong đội.
+  const parse=()=>ta.value.split(mode==="cup"&&cupBuild==="preset"?"\n":/\n|[,，、]/).map(s=>s.trim()).filter(Boolean);
   // Tên trùng (không phân biệt hoa thường, khoảng trắng) làm kết quả mập mờ, nên chặn trước khi chơi
   const nameKey=s=>s.toLowerCase().replace(/\s+/g," ");
   function dupNames(items){
@@ -1100,7 +1102,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   ta.addEventListener("input",()=>{$("err").textContent="";updateCount();store.set(listKey(),ta.value);refreshSelects();});
   // Xáo thứ tự tên bằng nguồn ngẫu nhiên mã hoá (dùng chung cho mọi mode)
   $("shuffleBtn").addEventListener("click",()=>{
-    const lines=ta.value.split("\n").map(x=>x.trim()).filter(Boolean);
+    const lines=parse(); // danh sách dấu phẩy được xếp lại thành mỗi dòng một tên
     if(lines.length<2) return;
     const u=new Uint32Array(lines.length); crypto.getRandomValues(u);
     for(let i=lines.length-1;i>0;i--){const j=u[i]%(i+1);[lines[i],lines[j]]=[lines[j],lines[i]];}
@@ -1327,7 +1329,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   $("copyRes").addEventListener("click",e=>{if(RES) copyText(RES.copy,e.currentTarget);});
   $("removeWin").addEventListener("click",()=>{
     if(!RES) return;
-    const lines=ta.value.split("\n").map(s=>s.trim()).filter(Boolean), i=lines.indexOf(RES.name);
+    const lines=parse(), i=lines.indexOf(RES.name);
     if(i>-1) lines.splice(i,1);
     ta.value=lines.join("\n"); store.set(listKey(),ta.value); updateCount();
     go();

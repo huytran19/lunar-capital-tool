@@ -32,6 +32,7 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Dê Leo Núi, Vòng quay 
   - Nút **🔀 Đổi chỗ** (không có ở vòng tròn): đổi vị trí 2 đội ở vòng 1, kể cả đội đang miễn đấu, bằng cách bấm 2 đội hoặc kéo đội này thả lên đội kia. Vị trí lưu ở `C.seat[k]` (vị trí k trên bảng là đội nào), `buildCup` dựng trận theo đó. Trận bị đổi người thì xoá kết quả; đảo 2 đội trong cùng trận thì giữ. Hoàn tác lưu cả kết quả lẫn vị trí.
   - Giải đang dở lưu ở `dua-ngong-cup` (không lưu danh sách trận, mở lại thì dựng lại). Có vô địch thì ghi vào lịch sử.
 ## Danh sách tên
+- Tách tên theo dòng **hoặc dấu phẩy** (`,` `，` `、`), trong `parse()`. Không tách theo khoảng trắng vì tên có dấu cách ("Tiêu Nại"). Riêng Giải đấu "Đội có sẵn" chỉ tách theo dòng (dấu phẩy ngăn thành viên). Bấm Xáo hoặc "Loại, chơi tiếp" thì danh sách dấu phẩy được viết lại thành mỗi dòng một tên.
 - Mọi mode: 2–40 tên (Giải đấu: 64 dòng). Quá giới hạn thì báo lỗi và không cho chơi (không cắt bớt).
 - Tên trùng (không phân biệt hoa thường, khoảng trắng) bị chặn trước khi chơi, vì cặp dính/cấm, "Loại, chơi tiếp" và "Né người vừa thắng" đều so theo tên. Cảnh báo hiện ngay dưới ô nhập (`listProblem()`).
 
