@@ -376,6 +376,40 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 .seg.herd{grid-template-columns:repeat(4,1fr) 1.6fr}
 .seg.herd button{font-size:20px;padding:8px 4px}
 .seg.herd button[data-herd="mix"]{font-size:14px}
+.seg.herd.hq3{grid-template-columns:repeat(3,1fr);margin-top:6px}
+.seg.herd.hq3 button{font-size:15px}
+/* Mèo / Chó: sheet riêng, ảnh vẽ tay nên làm mượt (không pixelated); vòng màu dưới chân thay cho tô màu lông */
+.spr.hq{background-image:url(sprites/meo-cho.webp)!important;image-rendering:auto;background-repeat:no-repeat}
+.winner .g .spr.hq{scale:1!important}
+/* Rùa về biển: bãi cát hai tông, biển xanh có sóng vỗ ở mép nước */
+.track-wrap.beach{background:#E9CF97}
+.beach .lane.a{background:#EDD6A2} .beach .lane.b{background:#E4C88E}
+.beach .marker{border-left-color:rgba(120,85,40,.35)} .beach .marker span{background:rgba(120,85,40,.45)}
+.beach .startline{background:#A8794A;opacity:.6}
+.beach .finish{width:22px;background:repeating-radial-gradient(circle at 100% 50%,#fff 0 3px,#BFEFFF 3px 7px);opacity:.95;z-index:2}
+.beach .deco{font-size:13px;opacity:.85}
+.sea{position:absolute;top:0;bottom:0;z-index:1;background:linear-gradient(90deg,rgba(255,255,255,.65),rgba(160,225,240,.4) 18px,transparent 40px),repeating-linear-gradient(180deg,#3BB3D8 0 22px,#35A7CC 22px 44px)}
+.nest-sign{position:absolute;top:4px;z-index:2;transform:translateX(-50%);font-size:11px;font-weight:800;color:#5B3C1C;background:rgba(255,248,230,.85);border-radius:6px;padding:0 6px;white-space:nowrap}
+.mini.beach{background:linear-gradient(90deg,#E9CF97 85%,#3BB3D8 85%)}
+.beach .gname{color:#fff;right:94%} /* rùa có chân sau và đuôi lòi ra bên trái, đẩy tên xa hơn cho khỏi đè */
+.tspr{--shell:#3E8E5A;width:100%;height:100%}
+.tspr svg{display:block;width:100%;height:100%;overflow:visible}
+.tspr .fl path,.tspr .head,.tspr .tail{fill:#7CC08A;stroke:#1F4D33;stroke-width:2.5;stroke-linejoin:round}
+.tspr .shell{fill:var(--shell);stroke:#1F4D33;stroke-width:3}
+.tspr .scute{fill:none;stroke:rgba(0,0,0,.28);stroke-width:2.2;stroke-linejoin:round}
+.tspr .shine{fill:rgba(255,255,255,.28)}
+.tspr .eye{fill:#14261B}
+.tspr .fl{transform-box:fill-box}
+.tspr .fl1,.tspr .fl3{transform-origin:0% 100%} .tspr .fl2,.tspr .fl4{transform-origin:0% 0%}
+.tspr[data-a="run"] .fl,.tspr[data-a="flap"] .fl,.tspr[data-a="walk"] .fl,.tspr[data-a="cheer"] .fl{animation:paddle .42s ease-in-out infinite alternate}
+.tspr[data-a="flap"] .fl,.tspr[data-a="cheer"] .fl{animation-duration:.2s}
+.tspr .fl2,.tspr .fl3{animation-delay:-.21s!important}
+@keyframes paddle{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+.tspr[data-a="run"] svg,.tspr[data-a="flap"] svg{animation:wiggle .42s ease-in-out infinite alternate}
+@keyframes wiggle{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.winner .g .tspr{width:100%;height:100%}
+@media (prefers-reduced-motion: reduce){.tspr .fl,.tspr svg{animation:none!important}} /* khung người thắng đã đủ to, phóng thêm thì chạm mép */
+.goose.hq::after{content:"";position:absolute;left:30%;right:30%;bottom:-1%;height:11%;border-radius:50%;background:var(--c);opacity:.9;z-index:-1;box-shadow:0 0 6px var(--c)}
 .spr{transform-origin:50% 100%}
 .gosling .spr{width:100%;height:100%}
 
@@ -528,6 +562,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       <button data-mode="give"><span>🎁</span><b>Đua Ngỗng</b><small>Đua ngang, về nhất là thắng</small></button>
       <button data-mode="climb"><span>🐐</span><b>Dê Leo Núi</b><small>Lên đỉnh núi trước là thắng</small></button>
       <button data-mode="pass"><span>🎟️</span><b>Vòng quay may mắn</b><small>Giữ lệnh bài, quay chọn 1</small></button>
+      <button data-mode="turtle"><span>🐢</span><b>Rùa về biển</b><small>Chạm sóng trước là thắng</small></button>
       <button data-mode="word"><span>✂️</span><b>Quay mất chữ</b><small>Trúng chữ nào, mất chữ đó</small></button>
       <button data-mode="team"><span>⚔️</span><b>Chia team</b><small>Chia đội đều sĩ số</small></button>
       <button data-mode="survive"><span>💥</span><b>Sinh tồn</b><small>Đấu trường kiếm hiệp</small></button>
@@ -632,6 +667,11 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         <button data-herd="squirrel" aria-label="Sóc">🐿️</button>
         <button data-herd="penguin" aria-label="Cánh cụt">🐧</button>
         <button data-herd="mix" aria-label="Trộn ngẫu nhiên">🔀 Trộn</button>
+      </div>
+      <div class="seg herd hq3" role="group" aria-label="Đàn hoạt hình mới">
+        <button data-herd="cat" aria-label="Mèo">🐱 Mèo</button>
+        <button data-herd="dog" aria-label="Chó">🐶 Chó</button>
+        <button data-herd="catdog" aria-label="Trộn mèo và chó">🐱🐶 Trộn</button>
       </div>
     </div>
     <div class="toggles">
@@ -798,17 +838,28 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   document.documentElement.style.setProperty("--volam",`url(${VL_SRC})`);
   // Sheet 264x432: mỗi ô 40x32 (bước 44x36), mọi con đều quay mặt sang phải. flap = bứt tốc, cheer = ăn mừng.
   const SPECIES=["goose","bunny","squirrel","penguin"];
+  // Đàn trộn: "mix" trộn 4 loài pixel, "catdog" trộn mèo và chó (không trộn chung hai kiểu vẽ khác nhau)
+  const MIXES={mix:SPECIES,catdog:["cat","dog"]};
+  const isMix=h=>Object.prototype.hasOwnProperty.call(MIXES,h);
+  // Mèo & Chó: pzUH – Cat & Dog Free Sprites (CC0), gộp thành sprites/meo-cho.webp (chỉ tải khi có con mèo/chó trên màn).
+  // Ô 150x120 (cùng tỉ lệ 1,25 với khung con thú), hàng 0-3 mèo: đứng, đi, chạy, nhảy; hàng 4-7 chó y vậy. Hình vẽ tay nên không tô màu lông, mỗi con có vòng màu dưới chân.
+  const HQ_W=1500, HQ_H=960, HQ_CW=150, HQ_CH=120;
   const SP_INFO={
     goose:{name:"Ngỗng",ic:"🪿",scale:1,cry:"Quác!"},
     bunny:{name:"Thỏ",ic:"🐰",scale:1.3,cry:"Hop hop!"},
     squirrel:{name:"Sóc",ic:"🐿️",scale:1.15,cry:"Chít chít!"},
-    penguin:{name:"Cánh cụt",ic:"🐧",scale:1.45,cry:"Lạch bạch!"}
+    penguin:{name:"Cánh cụt",ic:"🐧",scale:1.45,cry:"Lạch bạch!"},
+    cat:{name:"Mèo",ic:"🐱",scale:1.25,cry:"Meo meo!",hq:true},
+    dog:{name:"Chó",ic:"🐶",scale:1.25,cry:"Gâu gâu!",hq:true},
+    turtle:{name:"Rùa",ic:"🐢",scale:1,cry:"Ra biển!",svg:true}
   };
   const ANIMS={
     goose:{idle:{row:0,n:2,fps:3},walk:{row:1,n:4,fps:7},run:{row:2,n:4,fps:11},flap:{row:3,n:4,fps:14},cheer:{row:3,n:4,fps:12}},
     bunny:{idle:{row:4,n:2,fps:3},walk:{row:5,n:4,fps:7},run:{row:5,n:4,fps:12},flap:{row:5,n:4,fps:18},cheer:{row:5,n:4,fps:10}},
     squirrel:{idle:{row:6,n:2,fps:3},walk:{row:7,n:3,fps:6},run:{row:7,n:3,fps:12},flap:{row:7,n:3,fps:18},cheer:{row:7,n:3,fps:10}},
-    penguin:{idle:{row:8,n:2,fps:3},walk:{row:9,n:6,fps:9},run:{row:9,n:6,fps:15},flap:{row:11,n:4,fps:14},cheer:{row:10,n:2,fps:8}}
+    penguin:{idle:{row:8,n:2,fps:3},walk:{row:9,n:6,fps:9},run:{row:9,n:6,fps:15},flap:{row:11,n:4,fps:14},cheer:{row:10,n:2,fps:8}},
+    cat:{idle:{row:0,n:10,fps:10},walk:{row:1,n:10,fps:12},run:{row:2,n:8,fps:14},flap:{row:3,n:8,fps:14},cheer:{row:3,n:8,fps:10}},
+    dog:{idle:{row:4,n:10,fps:10},walk:{row:5,n:10,fps:12},run:{row:6,n:8,fps:14},flap:{row:7,n:8,fps:14},cheer:{row:7,n:8,fps:10}}
   };
   /* ---------- Thoại vui: theo tình huống, có câu riêng từng loài ---------- */
   const LINES={
@@ -818,13 +869,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       bunny:["Hop hop!","Cà rốt đâu rồi?","Tai dài để nghe tin thắng!","Nhảy là nghề của tui","Thỏ không chạy, thỏ bay!","Ai lấy cà rốt tui?","Đừng so tui với rùa nha","Chân sau lò xo nè","Bông đuôi xinh không?","Tui mà ngủ quên là thua đó","Nhảy cao nhảy xa"],
       squirrel:["Chít chít!","Hạt dẻ đâu?","Lẹ lên lẹ lên!","Đuôi xù chính hiệu","Tui giấu hạt khắp nơi","Cây nào cao nhất?","Chạy như sóc là đây!","Ai ăn vụng hạt của tui?","Tăng động xíu thôi","Nhanh như chớp!","Đừng cản đường sóc"],
       goat:["Beee!","Be be be!","Cỏ trên đỉnh ngon lắm nghe nói","Vách này dễ ợt","Móng tui bám đá cực chắc","Đói quá, leo lẹ!","Ai giành cỏ với tui?","Sừng này để húc đó nha","Nhìn xuống chóng mặt ghê","Dê núi chính hiệu","Đá lở kìa!","Leo núi là nghề của tui"],
+      cat:["Meo meo!","Meo~","Đừng vuốt lông tui!","Cá đâu rồi?","Tui có 9 mạng nha","Ngủ trưa xong mới đua","Chạy kiểu mèo là đây","Ai giẫm đuôi tui?","Meo, tránh ra!","Hộp các-tông đâu?"],
+      turtle:["Biển ơi tui tới đây!","Cát nóng quá à","Mai tui đẹp không?","Nghe tiếng sóng rồi!","Bò chậm mà chắc","Mới nở xong đã phải đua","Mẹ ơi biển ở đâu?","Đừng giẫm lên tui nha","Tui bơi giỏi lắm đó","Sao biển kìa!"],
+      dog:["Gâu gâu!","Gâu!","Xương đâu rồi?","Ve vẩy đuôi nè","Ai ném banh vậy?","Chạy là nghề của tui","Ngửi thấy mùi chiến thắng!","Gâu, chờ tui với!","Tui là bé ngoan nhất","Đuổi xe là chuyên môn"],
       penguin:["Lạch bạch!","Trượt nè!","Ở đây nóng quá à","Tui mặc vest đi đua đó","Băng đâu cho tui trượt?","Đi chậm mà chắc","Cá, tui muốn cá!","Chân ngắn nhưng ý chí dài","Đừng cười dáng đi tui","Không bay được thì tui lăn","Lịch lãm từng bước"]
     },
     start:{all:["Xuất phát!","Chạy thôi!","Let's go!","Đi nào!","Ai về chót bao nha!","Hít thở sâu…","Bật mode nghiêm túc"]},
     sprint:{all:["💨 Tăng tốc!","Bật turbo!","Vào số 5!","Nitro!","💨 Đuổi theo tui nè!","Chạy như bị đòi nợ!"],
-      goose:["Vỗ cánh full công suất!","Cánh quạt mode!"],bunny:["Bật lò xo!","Nhảy cóc x2!"],squirrel:["Chạy như bị đuổi!","Chít chít chít!!"],penguin:["Lăn tròn nè!","Chế độ bowling!"],goat:["Nhảy vách nè!","Bật đá 3 bước!","Phóng lên!","Bám chắc rồi, nhảy!"]},
+      goose:["Vỗ cánh full công suất!","Cánh quạt mode!"],bunny:["Bật lò xo!","Nhảy cóc x2!"],squirrel:["Chạy như bị đuổi!","Chít chít chít!!"],cat:["Bật chế độ mèo hoang!","Meo meo tăng tốc!"],turtle:["Sóng vỗ gọi tui!","Chèo hết công suất!","Lướt cát nè!"],dog:["Đuổi theo banh nè!","Gâu gâu full tốc!"],penguin:["Lăn tròn nè!","Chế độ bowling!"],goat:["Nhảy vách nè!","Bật đá 3 bước!","Phóng lên!","Bám chắc rồi, nhảy!"]},
     stall:{all:["🤔","Ủa mình đi đâu vậy ta?","Nghỉ xíu…","Quên tắt bếp!","Đợi tui buộc dây giày","Con bướm đẹp quá","Mệt quá à","Lạc đường rồi","Hình như rớt mạng","Để tui check tin nhắn"],
-      goose:["Có con sâu kìa","Chải lông xíu"],bunny:["Ngửi thấy cà rốt","Ngáp một cái"],squirrel:["Để tui chôn hạt đã","Nghe tiếng gì đó"],penguin:["Chân tê rồi","Nhớ Nam Cực quá"],goat:["Gặm miếng cỏ đã","Măm măm 🌿","Bụi cỏ ngon quá","Trượt chân xíu","Đường này cụt rồi","Ngắm cảnh chút"]},
+      goose:["Có con sâu kìa","Chải lông xíu"],bunny:["Ngửi thấy cà rốt","Ngáp một cái"],squirrel:["Để tui chôn hạt đã","Nghe tiếng gì đó"],cat:["Liếm lông xíu","Có con chuột kìa"],turtle:["Bị cua chặn đường","Mòng biển kìa, núp đã!","Lật ngửa rồi, cứu!","Vỏ sò đẹp quá"],dog:["Ngửi cái cột đã","Ủa có ai gọi tui?"],penguin:["Chân tê rồi","Nhớ Nam Cực quá"],goat:["Gặm miếng cỏ đã","Măm măm 🌿","Bụi cỏ ngon quá","Trượt chân xíu","Đường này cụt rồi","Ngắm cảnh chút"]},
     lead:{goat:["Thấy bãi cỏ rồi!","Đỉnh núi kìa!"],all:["Top 1 nè!","Bắt kịp tui đi!","Đẳng cấp là đây","Bye bye mấy đứa!","Ai dám vượt tui?","Nhìn lưng tui mà chạy","Tui đi trước dọn đường"]},
     win:{goat:["Cỏ non của tui hết!","Măm măm, ngon quá 🌿","Đỉnh núi là của tui!","Cả bãi cỏ này của tui!"],all:["Vô địch!","GG!","Easy game!","Cảm ơn đã theo dõi!","Thắng rồi, bao trà sữa nha!","Không ai cản nổi tui!","Tui biết mà!"]},
     attack:{all:["Cắn nè!","Xin một miếng!","Ra khỏi sân!","Chào nhé!","Đi đâu đó?","Tới lượt bạn!","Đứng yên đó!"],goose:["Mổ cho phát!"],squirrel:["Cắn như cắn hạt!"],penguin:["Húc nè!"],bunny:["Đá hậu nè!"]},
@@ -880,9 +934,17 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const url=blobUrl(cv.toDataURL("image/png")); tintCache.set(hex,url); return url;
   }
   const sprites=new Set();
+  // Rùa con nhìn từ trên xuống, quay mặt sang phải; mai tô theo màu người chơi (--shell), chân chèo đập bằng CSS
+  const TURTLE_SVG=`<svg viewBox="0 0 100 80" aria-hidden="true"><g class="fl fl1"><path d="M58 22 C64 6 78 2 84 6 C78 12 70 20 62 28Z"/></g><g class="fl fl2"><path d="M58 58 C64 74 78 78 84 74 C78 68 70 60 62 52Z"/></g><g class="fl fl3"><path d="M30 26 C24 14 14 12 10 16 C16 22 22 28 30 32Z"/></g><g class="fl fl4"><path d="M30 54 C24 66 14 68 10 64 C16 58 22 52 30 48Z"/></g><path class="tail" d="M18 40 L6 37 L6 43Z"/><circle class="head" cx="82" cy="40" r="11"/><circle class="eye" cx="86" cy="34.5" r="2.6"/><circle class="eye" cx="86" cy="45.5" r="2.6"/><ellipse class="shell" cx="46" cy="40" rx="31" ry="25"/><path class="scute" d="M46 18 L58 28 L58 52 L46 62 L34 52 L34 28Z M34 28 L18 33 M34 52 L18 47 M58 28 L72 33 M58 52 L72 47 M46 18 L46 15 M46 62 L46 65"/><ellipse class="shine" cx="40" cy="30" rx="9" ry="4.5"/></svg>`;
   function makeSprite(getAnim,species,tint){
+    if(SP_INFO[species]?.svg){
+      const el=document.createElement("div"); el.className="tspr"; el.innerHTML=TURTLE_SVG;
+      if(tint) el.style.setProperty("--shell",tint);
+      const sp={el,getAnim,sp:species,turtle:true,a:"",added:false}; sprites.add(sp); return sp;
+    }
     const el=document.createElement("div"); el.className="spr";
     const s=SP_INFO[species]?species:"goose";
+    if(SP_INFO[s].hq){el.classList.add("hq");tint=null;}
     if(SP_INFO[s].scale!==1) el.style.scale=String(SP_INFO[s].scale);
     const sp={el,getAnim,sp:s,phase:rnd()*10,added:false,tint:tint||null,tinted:!tint};
     sprites.add(sp); return sp;
@@ -892,9 +954,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   let paintN=0;
   function paint(t){
     const remeasure=(paintN++%60)===0;
-    for(const sp of sprites) if(!sp.vl&&!sp.goat&&sp.el.isConnected&&(remeasure||sp.h===undefined)) sp.h=sp.el.clientHeight;
+    for(const sp of sprites) if(!sp.vl&&!sp.goat&&!sp.turtle&&sp.el.isConnected&&(remeasure||sp.h===undefined)) sp.h=sp.el.clientHeight;
     for(const sp of sprites){
       if(!sp.el.isConnected){ if(sp.added) sprites.delete(sp); continue; }
+      if(sp.turtle){sp.added=true; const a=sp.getAnim(); if(a!==sp.a){sp.a=a; sp.el.dataset.a=a;} continue;}
       if(sp.goat){ // dê núi: sheet riêng, kích thước cố định nên không cần đo
         sp.added=true;
         const st=sp.getAnim(), a=GOAT_ANIMS[st.a]||GOAT_ANIMS.walk, f=st.f!=null?st.f:Math.floor((t/1000+sp.phase)*a.fps)%4;
@@ -913,8 +976,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       const h=sp.h; if(!h) continue;
       sp.added=true;
       if(!sp.tinted){const u=tintedSheet(sp.tint); if(u){sp.el.style.backgroundImage=`url(${u})`;sp.tinted=true;}}
-      const set=ANIMS[sp.sp], k=h/32, a=set[sp.getAnim()]||set.idle;
+      const set=ANIMS[sp.sp], a=set[sp.getAnim()]||set.idle;
       const f=Math.floor((t/1000+sp.phase)*a.fps)%a.n;
+      if(SP_INFO[sp.sp].hq){ // mèo / chó: ô 150x120 không viền
+        const kq=h/HQ_CH;
+        if(h!==sp.lastH){sp.lastH=h; sp.el.style.backgroundSize=`${(HQ_W*kq).toFixed(1)}px ${(HQ_H*kq).toFixed(1)}px`; sp.f=-1;}
+        const key=a.row*100+f;
+        if(key!==sp.f){sp.f=key; sp.el.style.backgroundPosition=`${(-f*HQ_CW*kq).toFixed(1)}px ${(-a.row*HQ_CH*kq).toFixed(1)}px`;}
+        continue;
+      }
+      const k=h/32;
       // mỗi ô 40x32 có viền trống 2px quanh, để khi phóng to không bị ăn lem sang ô bên cạnh; chỉ ghi khi có thay đổi
       if(h!==sp.lastH){sp.lastH=h; sp.el.style.backgroundSize=`${264*k}px ${432*k}px`; sp.f=-1;}
       const key=a.row*100+f;
@@ -952,6 +1023,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     root.querySelector(".gname").textContent=r.name||"";
     const sp=makeSprite(getAnim,r.sp,r.tint);
     root.insertBefore(sp.el,bd);
+    if(SP_INFO[r.sp]?.hq&&r.tint){root.classList.add("hq");root.style.setProperty("--c",r.tint);}
     r.el=root; r.spr=sp.el; r.bubble=root.querySelector(".bubble");
     return root;
   }
@@ -1011,7 +1083,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   function countdown(host,my,done){
     let ov=host.querySelector(":scope > .countdown");
     if(!ov){ov=document.createElement("div");ov.className="countdown";ov.innerHTML="<span></span>";host.appendChild(ov);}
-    const el=ov.firstChild, seq=["3","2","1",mode==="climb"?"Beee!":herd==="mix"?"Xuất phát!":SP_INFO[herd].cry];
+    const el=ov.firstChild, seq=["3","2","1",mode==="climb"?"Beee!":mode==="turtle"?"Ra biển!":isMix(herd)?"Xuất phát!":SP_INFO[herd].cry];
     seq.forEach((s,i)=>setTimeout(()=>{
       if(my!==session) return;
       el.textContent=s; el.style.fontSize=s.length>6?"56px":""; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
@@ -1032,10 +1104,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Setup ---------- */
   // Tên gọi thay theo đàn thú đang chọn (ngỗng, thỏ, ... hoặc thú khi trộn), dùng trong lời dẫn và nút
-  const NOUN={goose:"ngỗng",bunny:"thỏ",squirrel:"sóc",penguin:"cánh cụt",mix:"thú",goat:"dê"};
-  const noun=()=>mode==="climb"?"dê":NOUN[herd]||"thú";
+  const NOUN={turtle:"rùa",goose:"ngỗng",bunny:"thỏ",squirrel:"sóc",penguin:"cánh cụt",cat:"mèo",dog:"chó",mix:"thú",catdog:"thú",goat:"dê"};
+  const noun=()=>mode==="climb"?"dê":mode==="turtle"?"rùa":NOUN[herd]||"thú";
   const Noun=()=>noun().split(" ").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
-  const momName=()=>herd==="mix"?"Ngỗng mẹ":`${Noun()} mẹ`;
+  const momName=()=>isMix(herd)?"Ngỗng mẹ":`${Noun()} mẹ`;
   const prizeName=()=>($("prize").value.trim()||"Battle Pass");
   // Vũ khí mode Sinh tồn (để ở đây vì màn chuẩn bị hiện bảng vũ khí ngay lúc mở trang)
   const WEAPONS=[ // môn phái (đều cận chiến): sát thương min–max, hồi đòn (giây); id trùng tên nhân vật trong VL
@@ -1052,6 +1124,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     survive:{h:()=>"Phát vũ khí, chém nhau tới người cuối cùng.",lede:()=>"Mỗi người một chiến binh pixel với một món vũ khí ngẫu nhiên, mỗi món có sát thương tối thiểu–tối đa riêng. Cả sân lao vào chém nhau, hết máu là văng khỏi sân. Cuối trận bo thu hẹp, ở ngoài bo bị mất máu. Ai trụ lại cuối cùng là người thắng.",go:()=>"Vào đấu trường",max:40,dur:"Thời lượng trận"},
     egg:{h:()=>"Trứng ai nở trước, người đó trúng.",lede:()=>`Mỗi người một quả trứng. ${momName()} đi ấp lòng vòng, trứng rung rồi nứt dần. Quả nào nở ra con non đầu tiên là thắng.`,go:()=>"Bắt đầu ấp",max:40,dur:"Thời gian ấp"},
     pass:{h:()=>`Con ${noun()} dừng trước ai, người đó ẵm ${prizeName()}.`,lede:()=>`Cả nhóm xếp vòng quanh ${prizeName()}. Nhấn giữ lệnh bài lấy đà rồi thả, con ${noun()} chạy vòng vòng, chậm dần rồi dừng trước một người. Người đó mang giải về.`,go:()=>`Tranh ${prizeName()}`,max:40},
+    turtle:{h:()=>"Rùa con nào chạm sóng trước, người đó thắng.",lede:()=>"Cả ổ rùa vừa nở trên bãi cát. Mỗi người một bé rùa, bò hết tốc lực về phía biển, có bé bị cua chặn, có bé ngắm sao biển. Bé nào chạm con sóng đầu tiên là thắng.",go:()=>"Thả rùa ra biển",max:40,dur:"Độ dài bãi cát"},
     word:{h:()=>"Quay trúng chữ nào, chữ đó bay màu.",lede:()=>`Nhập một cái tên, mỗi chữ cái thành một ô trên vòng quay. Nhấn giữ lệnh bài lấy đà rồi thả, con ${noun()} dừng ở ô nào thì chữ đó bị xoá. Ví dụ KAZEY quay trúng A thành KZEY.`,go:()=>"Quay mất chữ",max:40},
     cup:{h:()=>"Chia bảng đấu, kéo thả người thắng.",lede:()=>"Tạo bảng nhánh thắng/thua, loại trực tiếp hoặc vòng tròn. Kéo thẻ một đội vào ô Thắng hoặc Thua, đội đó tự đi tiếp đúng nhánh.",go:()=>"Tạo bảng đấu",max:64}
   };
@@ -1073,7 +1146,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   let colorful=store.get("dua-ngong-color","1")==="1";
   let fillHerd=store.get("dua-ngong-fill","1")==="1"; // Dê Leo Núi: thêm dê rừng (không tính thắng) cho đủ bầy
   const CLIMB_HERD=30;
-  let herd=store.get("dua-ngong-herd","goose"); if(herd!=="mix"&&!SP_INFO[herd]) herd="goose";
+  let herd=store.get("dua-ngong-herd","goose"); if(!isMix(herd)&&!SP_INFO[herd]) herd="goose";
   // Giải đấu: thể thức, cách tạo đội, số người mỗi đội khi ghép ngẫu nhiên
   const CUP_KEY="dua-ngong-cup", CUP_FMTS=["double","single","rr"], CUP_BUILDS=["solo","random","preset"];
   const FMT_LABEL={double:"Nhánh thắng/thua",single:"Loại trực tiếp",rr:"Vòng tròn"};
@@ -1198,7 +1271,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     $("teamOpts").hidden=mode!=="team";
     $("payOpts").hidden=mode!=="pass";
     $("numWrap").hidden=mode==="pass"||mode==="word"||mode==="cup"||mode==="survive";
-    $("herdWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb";
+    $("herdWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb"||mode==="turtle";
     $("colorWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb"||mode==="word";
     // Quay mất chữ: nhập một tên thay cho danh sách
     $("listWrap").hidden=mode==="word"; $("wordWrap").hidden=mode!=="word";
@@ -1211,7 +1284,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     document.querySelectorAll("[data-cupbuild]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.cupbuild===cupBuild)));
     document.querySelectorAll("[data-cupsize]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.cupsize===cupSize)));
     cupArmed=false;
-    $("listHint").textContent=`Từ 2 đến ${info.max} tên. Danh sách được giữ lại cho lần sau. `+(mode==="survive"?"Nhân vật: LuizMelo – Martial Hero 1–3 (CC0).":mode==="climb"?"Dê núi: Sevarihk (CC-BY 4.0). Nền núi: ansimuz (CC0).":"Sprite thú: Duckhive (CC0).");
+    $("listHint").textContent=`Từ 2 đến ${info.max} tên. Danh sách được giữ lại cho lần sau. `+(mode==="survive"?"Nhân vật: LuizMelo – Martial Hero 1–3 (CC0).":mode==="climb"?"Dê núi: Sevarihk (CC-BY 4.0). Nền núi: ansimuz (CC0).":(herd==="cat"||herd==="dog"||herd==="catdog"?"Mèo, chó: pzUH (CC0).":"Sprite thú: Duckhive (CC0)."));
     $("err").textContent="";
     applyText(); updateCount(); refreshSelects(); if(mode==="pass") lastWinInfo(); if(mode==="cup") cupSetupInfo();
   }
@@ -1252,9 +1325,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     $("err").textContent="";
     if(mode==="cup") return goCup();
     // Trộn: chia đều các loài rồi xáo, để đàn không bị lệch về một loài
-    let pool=[]; while(pool.length<items.length) pool=pool.concat(shuffle(SPECIES));
-    const racers=items.map((name,i)=>{const color=COLORS[i%COLORS.length];return {name,num:i+1,color,tint:colorful?color:null,sp:herd==="mix"?pool[i]:herd};});
+    let pool=[]; while(pool.length<items.length) pool=pool.concat(shuffle(MIXES[herd]||SPECIES));
+    const racers=items.map((name,i)=>{const color=COLORS[i%COLORS.length];return {name,num:i+1,color,tint:colorful?color:null,sp:isMix(herd)?pool[i]:herd};});
     if(mode==="give") return startGive(racers);
+    if(mode==="turtle"){racers.forEach(r=>r.sp="turtle"); return startGive(racers,{turtle:true});}
     if(mode==="climb") return startClimb(racers);
     if(mode==="survive") return startSurvive(racers);
     if(mode==="egg") return startEgg(racers);
@@ -1360,11 +1434,11 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Lịch sử các ván ---------- */
   const HIST_KEY="dua-ngong-history", HIST_MAX=100;
-  const MODE_LABEL={word:"✂️ Quay mất chữ",cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",climb:"🐐 Dê Leo Núi",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
+  const MODE_LABEL={turtle:"🐢 Rùa về biển",word:"✂️ Quay mất chữ",cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",climb:"🐐 Dê Leo Núi",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
   function loadHistory(){try{const h=JSON.parse(store.get(HIST_KEY,"[]"));return Array.isArray(h)?h:[];}catch(e){return [];}}
   function addHistory(e){const h=loadHistory();h.unshift({t:Date.now(),...e});store.set(HIST_KEY,JSON.stringify(h.slice(0,HIST_MAX)));}
   const fmtTime=t=>{const d=new Date(t),p=x=>String(x).padStart(2,"0");return `${p(d.getHours())}:${p(d.getMinutes())} ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;};
-  const herdWord=h=>h==="mix"?"thú":(NOUN[h]||"thú");
+  const herdWord=h=>isMix(h)?"thú":(NOUN[h]||"thú");
   const histMeta=e=>`${fmtTime(e.t)} · ${MODE_LABEL[e.mode]||e.mode} · ${e.n} ${e.mode==="cup"?"đội":e.mode==="survive"?"chiến binh":"con "+herdWord(e.herd)}`;
   function histLine(e){
     const head=histMeta(e);
@@ -1416,7 +1490,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     else wg.appendChild(makeSprite(()=>cfg.anim||"cheer",cfg.sp,tint).el);
     if(cfg.num){const bd=document.createElement("span");bd.className="badge";bd.style.background=cfg.color;bd.textContent=cfg.num;wg.appendChild(bd);}
     $("winLabel").textContent=cfg.label; $("winName").textContent=cfg.name;
-    addHistory({mode,herd:mode==="climb"?"goat":herd,n:cfg.n||(cfg.order?cfg.order.length:0),winner:cfg.name,prize:mode==="pass"?prizeName():"",top:(cfg.order||[]).slice(1,3).map(r=>r.name)});
+    addHistory({mode,herd:mode==="climb"?"goat":mode==="turtle"?"turtle":herd,n:cfg.n||(cfg.order?cfg.order.length:0),winner:cfg.name,prize:mode==="pass"?prizeName():"",top:(cfg.order||[]).slice(1,3).map(r=>r.name)});
     const ol=$("rank"); ol.innerHTML=""; ol.hidden=!cfg.order;
     (cfg.order||[]).forEach(r=>{const li=document.createElement("li");const sw=document.createElement("span");sw.className="sw";sw.style.background=r.color;li.appendChild(sw);li.appendChild(document.createTextNode(r.name+(cfg.note?" · "+cfg.note(r):"")));ol.appendChild(li);});
     $("again").textContent=cfg.again;
@@ -1436,9 +1510,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Mode: Đua Ngỗng (give) ---------- */
   let G=null;
-  function startGive(racers){
+  function startGive(racers,opt={}){ // opt.turtle: Rùa về biển (bãi cát -> biển)
     const my=++session; show(scr.race);
     const wrap=$("trackWrap"), world=$("world"), mini=$("mini");
+    wrap.classList.toggle("beach",!!opt.turtle); mini.classList.toggle("beach",!!opt.turtle);
     world.innerHTML=""; mini.querySelectorAll("i").forEach(x=>x.remove());
     const n=racers.length, W=wrap.clientWidth;
     const lh=n<=8?52:n<=15?42:n<=25?32:26, gh=lh-2, gw=gh*1.25;
@@ -1453,9 +1528,13 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const steps=Math.max(3,Math.round(dur/5));
     for(let k=1;k<steps;k++){const m=document.createElement("div");m.className="marker";m.style.left=(START+TRACK*k/steps)+"px";m.innerHTML=`<span>${Math.round(k/steps*100)}%</span>`;world.appendChild(m);}
     const fin=document.createElement("div"); fin.className="finish"; fin.style.left=END+"px"; world.appendChild(fin);
-    const decos=["🌼","🌿","🌸","🍀"];
-    for(let k=0;k<Math.round(worldW/45);k++){const d=document.createElement("span");d.className="deco";d.textContent=decos[k%4];d.style.left=between(0,worldW)+"px";d.style.top=between(0,H-14)+"px";world.appendChild(d);}
-    G={my,racers,W,wrap,START,TRACK,worldW,gw,cam:0,running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
+    if(opt.turtle){ // biển từ mép nước tới hết đường, sóng vỗ ở mép
+      const sea=document.createElement("div"); sea.className="sea"; sea.style.left=END+"px"; sea.style.width=(worldW-END)+"px"; world.appendChild(sea);
+      const nest=document.createElement("span"); nest.className="nest-sign"; nest.textContent="🥚 Tổ rùa"; nest.style.left=START+"px"; world.appendChild(nest);
+    }
+    const decos=opt.turtle?["🐚","⭐","🦀","🐚","🪸"]:["🌼","🌿","🌸","🍀"];
+    for(let k=0;k<Math.round(worldW/45);k++){const d=document.createElement("span");d.className="deco";d.textContent=decos[k%decos.length];d.style.left=between(0,opt.turtle?END-20:worldW)+"px";d.style.top=between(0,H-14)+"px";world.appendChild(d);}
+    G={my,racers,W,wrap,START,TRACK,worldW,gw,turtle:!!opt.turtle,cam:0,running:false,winner:null,finishedAt:0,finished:[],leaderName:"",t:0};
     racers.forEach((r,i)=>{
       Object.assign(r,{p:0,base:between(.96,1.04)/dur,mult:1,target:1,retarget:0,state:"run",stateT:0,bubbleT:0,done:false});
       const g=makeGoose(r,()=>(!G.running||r.done||r.state==="stall")?"idle":r.state==="sprint"?"flap":"run");
@@ -1464,7 +1543,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       const dot=document.createElement("i"); dot.style.background=r.color; mini.appendChild(dot); r.dot=dot;
       placeGive(r);
     });
-    $("status").textContent="Cả đàn vào vạch xuất phát…";
+    $("status").textContent=opt.turtle?"Ổ rùa đang nở…":"Cả đàn vào vạch xuất phát…";
     countdown(wrap,my,()=>{G.running=true;$("status").textContent="Đang đua!";shuffle(racers).slice(0,Math.min(3,racers.length)).forEach(r=>say(r,line(r,"start")));loop(my,tickGive);});
   }
   function placeGive(r){
@@ -1491,7 +1570,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       r.p+=r.base*m*dt;
       if(r.p>=1){
         r.p=1; r.done=true; G.finished.push(r);
-        if(!G.winner){G.winner=r;G.finishedAt=G.t;say(r,line(r,"win"),2.5);honk(1.25);honk(1.25,.28);$("status").textContent=`🏆 ${r.name} về nhất!`;}
+        if(!G.winner){G.winner=r;G.finishedAt=G.t;say(r,line(r,"win"),2.5);honk(1.25);honk(1.25,.28);$("status").textContent=G.turtle?`🌊 ${r.name} chạm sóng đầu tiên!`:`🏆 ${r.name} về nhất!`;}
       }
       placeGive(r);
     }
@@ -1508,8 +1587,9 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     if(G.winner&&G.t-G.finishedAt>1.6){
       G.running=false;
       const order=G.finished.concat(G.racers.filter(r=>!G.finished.includes(r)).sort((a,b)=>b.p-a.p)), w=order[0];
-      setTimeout(()=>G.my===session&&showResult({label:"🏆 Về nhất",name:w.name,sp:w.sp,color:w.color,num:showNum?w.num:0,order,again:"Đua lại",
-        removeText:order.length>2?`Loại "${w.name}", đua tiếp`:null,copy:rankCopy(`🏆 Người thắng: ${w.name}`,order)}),300);
+      const tt=G.turtle;
+      setTimeout(()=>G.my===session&&showResult({label:tt?"🌊 Chạm sóng đầu tiên":"🏆 Về nhất",name:w.name,sp:w.sp,color:w.color,tint:tt?undefined:w.tint==null?false:undefined,num:showNum?w.num:0,order,again:tt?"Thả lại":"Đua lại",
+        removeText:order.length>2?`Loại "${w.name}", ${tt?"thả tiếp":"đua tiếp"}`:null,copy:rankCopy(`${tt?"🌊 Chạm sóng đầu tiên":"🏆 Người thắng"}: ${w.name}`,order)}),300);
       return false;
     }
   }
@@ -1934,15 +2014,16 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
           `Lệnh bài được giữ tới **${pct}%** lực, bàn quay xoay **${laps} vòng** chóng cả mặt. Khi mọi thứ đứng yên, chỉ còn một người được chọn ✨`,
           `**${R.k}** người nín thở. Con ${noun()} chạy **${laps} vòng**, chậm dần, chậm dần… rồi dừng lại 🌙`]),fields};
     }
-    const order=RES.order||[], n=order.length, climb=mode==="climb";
+    const order=RES.order||[], n=order.length, climb=mode==="climb", turtle=mode==="turtle";
     const podium=order.slice(0,3).map((r,i)=>["🥇","🥈","🥉"][i]+" "+(i?dcEsc(r.name):`**${dcEsc(r.name)}**${tag}`)).join("\n");
-    const fields=[{name:climb?"⛰️ Lên đỉnh":"🏁 Bục vinh quang",value:podium||"—"}];
+    const fields=[{name:climb?"⛰️ Lên đỉnh":turtle?"🌊 Chạm sóng":"🏁 Bục vinh quang",value:podium||"—"}];
     if(n>3) fields.push({name:`4–${Math.min(10,n)}`,value:dcCut(order.slice(3,10).map(r=>dcEsc(r.name)).join(" · "),1024)});
-    if(n>3) fields.push({name:climb?"🧗 Còn ở chân núi":"🐢 Về chót",value:`${dcEsc(order[n-1].name)} (lần sau cố lên!)`,inline:true});
-    fields.push({name:"⏱️ "+(climb?"Đường leo":"Đường đua"),value:`~${dur} giây · ${n} con`,inline:true});
-    fields.push({name:"​",value:`*${name} ${climb?"chinh phục đỉnh núi":"ẵm giải"}, chúc mừng!* 🎉`});
-    return {...base,title:climb?"🌕 LUNAR CAPITAL · DÊ LEO NÚI":"🌕 LUNAR CAPITAL · ĐUA "+noun().toUpperCase(),color:climb?0x9B7BB8:0x6AB04C,
-      description:climb?pickOne([`**${n}** con dê bật nhảy lên vách đá, cú nào cũng xéo 45° như sách giáo khoa. Đứa đầu tiên đặt chân lên bãi cỏ trên đỉnh là…`,
+    if(n>3) fields.push({name:climb?"🧗 Còn ở chân núi":turtle?"🏖️ Còn mải ngắm cát":"🐢 Về chót",value:`${dcEsc(order[n-1].name)} (lần sau cố lên!)`,inline:true});
+    fields.push({name:"⏱️ "+(climb?"Đường leo":turtle?"Bãi cát":"Đường đua"),value:`~${dur} giây · ${n} con`,inline:true});
+    fields.push({name:"​",value:`*${name} ${climb?"chinh phục đỉnh núi":turtle?"về với biển đầu tiên":"ẵm giải"}, chúc mừng!* 🎉`});
+    return {...base,title:climb?"🌕 LUNAR CAPITAL · DÊ LEO NÚI":turtle?"🌕 LUNAR CAPITAL · RÙA CON VỀ BIỂN":"🌕 LUNAR CAPITAL · ĐUA "+noun().toUpperCase(),color:climb?0x9B7BB8:turtle?0x2EA8C8:0x6AB04C,
+      description:turtle?pickOne([`**${n}** bé rùa vừa nở trên bãi cát dưới ánh trăng, cùng bò về phía biển. Bé nào chạm con sóng đầu tiên? 🌊`,
+          `Cát nóng, sóng gọi, cua chắn đường… **${n}** bé rùa cố hết sức về với biển 🐢`]):climb?pickOne([`**${n}** con dê bật nhảy lên vách đá, cú nào cũng xéo 45° như sách giáo khoa. Đứa đầu tiên đặt chân lên bãi cỏ trên đỉnh là…`,
           `Núi cao, gió lạnh, cỏ trên đỉnh thì ngon. **${n}** con dê cùng leo, chỉ một con được ăn trước 🐐`])
         :pickOne([`**${n}** con ${noun()} xuất phát, đường đua ~${dur} giây. Cả đàn chen nhau, có con lạc đường, có con đứng hóng gió… nhưng chỉ một con về nhất!`,
           `Còi vừa thổi, **${n}** con ${noun()} lao đi như bão. Có con bứt tốc, có con dừng lại tám chuyện… và đây là kết quả 🏁`,
@@ -1956,7 +2037,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const id=dcIds().get(RES.name), role=dcRole();
     if(!id&&!role) return none;
     const who=id?`<@${id}>`:`**${dcEsc(RES.name)}**`;
-    const what=mode==="pass"?`ẵm **${dcEsc(prizeName())}**`:mode==="climb"?"lên đỉnh núi đầu tiên":`về nhất Đua ${Noun()}`;
+    const what=mode==="pass"?`ẵm **${dcEsc(prizeName())}**`:mode==="climb"?"lên đỉnh núi đầu tiên":mode==="turtle"?"chạm sóng đầu tiên":`về nhất Đua ${Noun()}`;
     return {content:`${role?`<@&${role}> `:""}🎉 Chúc mừng ${who} ${what}!`,allowed_mentions:{parse:[],users:id?[id]:[],roles:role?[role]:[]}};
   }
   async function sendDiscord(btn){
@@ -2220,7 +2301,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       nest.appendChild(cell);
       Object.assign(r,{cell,egg:cell.querySelector(".egg"),line,p:0,base:between(.95,1.05)/T0,mult:1,target:1,retarget:0,shakeEnd:0,stage:0,hatched:false});
     });
-    const mom={name:"",color:"#333",num:"",sp:herd==="mix"?"goose":herd};
+    const mom={name:"",color:"#333",num:"",sp:isMix(herd)?"goose":herd};
     const mEl=makeGoose(mom,()=>E.mom.state==="walk"?"walk":"idle");
     mEl.classList.add("mother"); nest.appendChild(mEl);
     const mw=Math.round(clamp(racers[0].egg.offsetWidth*1.05,52,96)), mh=Math.round(mw*.8);
@@ -2378,7 +2459,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       if(f.length&&f.length<cands.length){cands=f; seats[items.findIndex(it=>it.name===lastWin)].classList.add("skip");}
     }
     const a0=rnd()*2*Math.PI;
-    const runner={name:"",color:"#333",num:"",sp:herd==="mix"?pick(SPECIES):herd};
+    const runner={name:"",color:"#333",num:"",sp:isMix(herd)?pick(MIXES[herd]):herd};
     makeGoose(runner,()=>R.speed>5?"flap":R.speed>1.4?"run":R.speed>.15?"walk":"idle");
     runner.el.style.width=gw+"px"; runner.el.style.height=gh+"px";
     host.appendChild(runner.el);
