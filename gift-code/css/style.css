@@ -817,3 +817,35 @@ kbd {
   .dl-note { font-size: 12px; }
   .dl-btns { gap: 8px; }
 }
+
+/* ---------- Man hinh rong: 2 cot ---------- */
+/* Trai: gioi thieu + tai app (dinh tren khi cuon). Phai: thanh tim kiem + danh sach code,
+   danh sach tu chia 2 cot neu du cho. Hep hon 1100px thi ve lai 1 cot nhu cu. */
+@media (min-width: 1100px) {
+  .wrap { max-width: 1320px; padding: 0 28px; }
+  .main {
+    display: grid;
+    grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+    gap: 0 32px;
+    align-items: start;
+  }
+  .side { padding-bottom: 20px; }
+  .side .dl-grid { display: none; } /* 3 the tinh nang da co o trang huong dan */
+  .side .hero { padding: 30px 0 18px; text-align: left; }
+  .side .hero h1 { font-size: 30px; }
+  .side .dl { margin-top: 0; padding: 22px 18px; text-align: left; }
+  .side .dl h2 { font-size: 18px; }
+  .side .dl-lead { margin-left: 0; }
+  .side .dl-btns { margin-top: 16px; }
+  .side .dl-btns { justify-content: flex-start; }
+  .side .dl-btns .cta { width: 100%; justify-content: center; }
+  .side a.ghost.lg { flex: 1 1 auto; justify-content: center; min-height: 42px; padding: 0 12px; font-size: 14px; }
+  .codes { padding-top: 30px; }
+  .codes .toolbar { position: sticky; top: 54px; z-index: 5; padding: 10px 0 12px; background: linear-gradient(180deg, var(--bg) 70%, transparent); }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 8px; }
+  .foot { max-width: 1320px; }
+}
+/* Cot trai chi dinh tren khi man hinh du cao de chua het, khong thi cac nut tai bi khuat */
+@media (min-width: 1100px) and (min-height: 760px) {
+  .side { position: sticky; top: 54px; }
+}
