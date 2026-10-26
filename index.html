@@ -110,8 +110,12 @@ body.in-game::after{opacity:0;transform:translateY(-50px) scale(.85)} /* không 
   #screen-result .winner{grid-area:win;position:sticky;top:20px;padding:32px 24px 26px}
   #screen-result .winner .g{width:200px;height:160px}
   #screen-result .rank{grid-area:rank}
-  #screen-result .actions{grid-area:act;grid-template-columns:1fr 1fr;position:sticky;top:330px}
+  #screen-result .actions{grid-area:act;grid-template-columns:repeat(3,1fr);position:sticky;top:330px}
+  #screen-result .actions .ghost{padding:10px 8px;font-size:14px}
   #screen-result .actions .cta{grid-column:1/-1}
+  /* mode không có bảng xếp hạng (Vòng quay…): một cột căn giữa */
+  #screen-result:has(.rank[hidden]){grid-template-columns:minmax(0,560px);grid-template-rows:auto auto;grid-template-areas:"win" "act";justify-content:center}
+  #screen-result:has(.rank[hidden]) .winner,#screen-result:has(.rank[hidden]) .actions{position:static}
   body .rank li{padding:9px 16px}
   body .teams{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
   body .teams.three{grid-template-columns:repeat(3,1fr)}
@@ -2135,9 +2139,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         path.setAttribute("fill",SLICE_COLORS[i%SLICE_COLORS.length]); path.setAttribute("class","seg");
         svg.appendChild(path); seats.push(path);
         const mid=a0+seg/2, right=mid<Math.PI; // nửa trái lật chữ lại cho khỏi ngược
-        const [tx,ty]=P(mid,right?outer-6:inner+6);
+        // cả hai nửa đều neo chữ sát vành ngoài (nửa trái đã lật nên neo "start" thay vì "end")
+        const [tx,ty]=P(mid,outer-8);
         const text=document.createElementNS(NS,"text");
-        text.setAttribute("x",tx); text.setAttribute("y",ty); text.setAttribute("text-anchor","end"); text.setAttribute("dominant-baseline","middle");
+        text.setAttribute("x",tx); text.setAttribute("y",ty); text.setAttribute("text-anchor",right?"end":"start"); text.setAttribute("dominant-baseline","middle");
         text.setAttribute("font-size",fs.toFixed(1));
         text.setAttribute("transform",`rotate(${mid*180/Math.PI-90+(right?0:180)} ${tx} ${ty})`);
         const maxCh=Math.max(6,Math.floor((outer-inner-10)/(fs*.56)));
