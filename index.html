@@ -87,6 +87,8 @@ body.in-game::after{opacity:0;transform:translateY(-50px) scale(.85)} /* không 
 #screen-setup .modes button b{font-weight:700;line-height:1.2}
 #screen-setup .modes button small{font-size:12px;font-weight:500;color:var(--muted);line-height:1.25}
 #screen-setup .modes button[aria-pressed="true"] small{color:inherit;opacity:.75}
+#screen-setup .modes button.span2{grid-column:1/-1} /* số chế độ lẻ thì thẻ cuối trải hết hàng, khỏi nằm lẻ một mình */
+.word-in{font-size:22px;font-weight:700;letter-spacing:.06em;padding:14px 16px}
 .mode-desc{position:relative;padding:14px 16px 16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(243,217,139,.10),transparent 55%),var(--card);overflow:hidden}
 .mode-desc::before{content:"";position:absolute;right:-26px;top:-26px;width:90px;height:90px;border-radius:50%;box-shadow:-14px 10px 0 0 var(--accent);opacity:.18}
 /* chữ chuyển màu chỉ tô trong khung chữ: chừa đệm trên cho dấu chồng (ỗ, ề) của Baloo 2 khỏi bị cắt thành "ngông" */
@@ -112,6 +114,7 @@ body.in-game::after{opacity:0;transform:translateY(-50px) scale(.85)} /* không 
   #screen-result .rank{grid-area:rank}
   #screen-result .actions{grid-area:act;grid-template-columns:repeat(3,1fr);position:sticky;top:330px}
   #screen-result .actions .ghost{padding:10px 8px;font-size:14px}
+  #screen-result .actions:has(#removeWin[hidden]){grid-template-columns:1fr 1fr} /* không có nút "Loại…, chơi tiếp" thì 2 nút còn lại chia đôi */
   #screen-result .actions .cta{grid-column:1/-1}
   /* mode không có bảng xếp hạng (Vòng quay…): một cột căn giữa */
   #screen-result:has(.rank[hidden]){grid-template-columns:minmax(0,560px);grid-template-rows:auto auto;grid-template-areas:"win" "act";justify-content:center}
@@ -359,6 +362,7 @@ select{font:inherit;font-size:15px;padding:9px 6px;border:2px solid var(--line);
 @media (prefers-reduced-motion: reduce){.ring svg.wheel .bulb{animation:none}}
 .ring svg.wheel{position:absolute;inset:0;width:100%;height:100%}
 .ring svg.wheel text{font-family:"Be Vietnam Pro",sans-serif;font-weight:700;fill:#1b1b1b}
+.ring svg.wheel text.letter{font-family:"Baloo 2",sans-serif;font-weight:800;pointer-events:none}
 .ring svg.wheel path.seg{transition:filter .15s}
 .ring svg.wheel path.seg.on{filter:brightness(1.18)}
 .seat{position:absolute;transform:translate(-50%,-50%);background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px;font-weight:700;white-space:nowrap;max-width:92px;overflow:hidden;text-overflow:ellipsis;z-index:1;transition:transform .15s,background .15s}
@@ -524,6 +528,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
       <button data-mode="give"><span>🎁</span><b>Đua Ngỗng</b><small>Đua ngang, về nhất là thắng</small></button>
       <button data-mode="climb"><span>🐐</span><b>Dê Leo Núi</b><small>Lên đỉnh núi trước là thắng</small></button>
       <button data-mode="pass"><span>🎟️</span><b>Vòng quay may mắn</b><small>Giữ lệnh bài, quay chọn 1</small></button>
+      <button data-mode="word"><span>✂️</span><b>Quay mất chữ</b><small>Trúng chữ nào, mất chữ đó</small></button>
       <button data-mode="team"><span>⚔️</span><b>Chia team</b><small>Chia đội đều sĩ số</small></button>
       <button data-mode="survive"><span>💥</span><b>Sinh tồn</b><small>Đấu trường kiếm hiệp</small></button>
       <button data-mode="egg"><span>🥚</span><b>Trứng nở</b><small>Trứng nở trước là thắng</small></button>
@@ -535,8 +540,13 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     </div>
     </div>
     <div class="col-b stack">
-    <p class="step"><b>2</b>Nhập danh sách</p>
-    <div class="field-wrap">
+    <p class="step"><b>2</b><span id="step2">Nhập danh sách</span></p>
+    <div class="field-wrap" id="wordWrap" hidden>
+      <label for="wordIn"><b>Tên muốn quay</b> <span id="wordCount"></span></label>
+      <input id="wordIn" class="text-in word-in" type="text" maxlength="40" placeholder="Ví dụ: Kazey" autocomplete="off" spellcheck="false">
+      <p class="hint">Mỗi chữ cái thành một ô trên vòng quay (bỏ qua dấu cách). Từ 2 đến 30 chữ. Quay xong, tên mới tự điền vào đây để quay tiếp.</p>
+    </div>
+    <div class="field-wrap" id="listWrap">
       <div class="list-head"><label for="names"><b id="listLabel">Danh sách</b> <span id="count"></span></label>
         <button class="mini-btn" id="shuffleBtn" type="button">🔀 Xáo thứ tự</button></div>
       <textarea id="names" spellcheck="false" placeholder="Mỗi dòng một tên, hoặc cách nhau bằng dấu phẩy"></textarea>
@@ -1042,12 +1052,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     survive:{h:()=>"Phát vũ khí, chém nhau tới người cuối cùng.",lede:()=>"Mỗi người một chiến binh pixel với một món vũ khí ngẫu nhiên, mỗi món có sát thương tối thiểu–tối đa riêng. Cả sân lao vào chém nhau, hết máu là văng khỏi sân. Cuối trận bo thu hẹp, ở ngoài bo bị mất máu. Ai trụ lại cuối cùng là người thắng.",go:()=>"Vào đấu trường",max:40,dur:"Thời lượng trận"},
     egg:{h:()=>"Trứng ai nở trước, người đó trúng.",lede:()=>`Mỗi người một quả trứng. ${momName()} đi ấp lòng vòng, trứng rung rồi nứt dần. Quả nào nở ra con non đầu tiên là thắng.`,go:()=>"Bắt đầu ấp",max:40,dur:"Thời gian ấp"},
     pass:{h:()=>`Con ${noun()} dừng trước ai, người đó ẵm ${prizeName()}.`,lede:()=>`Cả nhóm xếp vòng quanh ${prizeName()}. Nhấn giữ lệnh bài lấy đà rồi thả, con ${noun()} chạy vòng vòng, chậm dần rồi dừng trước một người. Người đó mang giải về.`,go:()=>`Tranh ${prizeName()}`,max:40},
+    word:{h:()=>"Quay trúng chữ nào, chữ đó bay màu.",lede:()=>`Nhập một cái tên, mỗi chữ cái thành một ô trên vòng quay. Nhấn giữ lệnh bài lấy đà rồi thả, con ${noun()} dừng ở ô nào thì chữ đó bị xoá. Ví dụ KAZEY quay trúng A thành KZEY.`,go:()=>"Quay mất chữ",max:40},
     cup:{h:()=>"Chia bảng đấu, kéo thả người thắng.",lede:()=>"Tạo bảng nhánh thắng/thua, loại trực tiếp hoặc vòng tròn. Kéo thẻ một đội vào ô Thắng hoặc Thua, đội đó tự đi tiếp đúng nhánh.",go:()=>"Tạo bảng đấu",max:64}
   };
   // Mode đang tạm khoá: không hiện nút, không vào được qua link hay lựa chọn đã lưu. Mở lại thì xoá khỏi danh sách này.
   const LOCKED=new Set(["survive","egg","cup"]);
   const usable=m=>!!MODE_INFO[m]&&!LOCKED.has(m);
   document.querySelectorAll("[data-mode]").forEach(b=>{if(LOCKED.has(b.dataset.mode)) b.hidden=true;});
+  {const vis=[...document.querySelectorAll("[data-mode]")].filter(b=>!b.hidden); if(vis.length%2) vis[vis.length-1].classList.add("span2");}
   if(LOCKED.has("cup")) $("teamToCup").hidden=true;
   let mode=store.get("dua-ngong-mode","give"); if(mode==="pay") mode="pass"; if(!usable(mode)) mode="give";
   // Link riêng từng mode: ?mode=give|team|survive|egg|pass (các thư mục /giveaway/, /chia-team/... chuyển về đây)
@@ -1181,12 +1193,17 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     document.querySelectorAll("[data-spd]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.spd===spd)));
     document.querySelectorAll("[data-k]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.k===teamK)));
     document.querySelectorAll("[data-herd]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.herd===herd)));
-    $("herdLabel").textContent=mode==="pass"?"Con chạy vòng":mode==="egg"?"Trứng của con gì":"Đàn thú";
+    $("herdLabel").textContent=mode==="pass"||mode==="word"?"Con chạy vòng":mode==="egg"?"Trứng của con gì":"Đàn thú";
     $("durWrap").hidden=!info.dur; if(info.dur) $("durLabel").textContent=info.dur;
     $("teamOpts").hidden=mode!=="team";
     $("payOpts").hidden=mode!=="pass";
-    $("numWrap").hidden=mode==="pass"||mode==="cup"||mode==="survive";
-    $("herdWrap").hidden=$("colorWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb";
+    $("numWrap").hidden=mode==="pass"||mode==="word"||mode==="cup"||mode==="survive";
+    $("herdWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb";
+    $("colorWrap").hidden=mode==="cup"||mode==="survive"||mode==="climb"||mode==="word";
+    // Quay mất chữ: nhập một tên thay cho danh sách
+    $("listWrap").hidden=mode==="word"; $("wordWrap").hidden=mode!=="word";
+    $("step2").textContent=mode==="word"?"Nhập tên":"Nhập danh sách";
+    document.querySelectorAll("[data-edit]").forEach(b=>b.textContent=mode==="word"?"Đổi tên khác":"Sửa danh sách");
     $("fillWrap").hidden=mode!=="climb";
     $("cupOpts").hidden=mode!=="cup";
     $("survHint").hidden=mode!=="survive"; if(mode==="survive") $("survHint").textContent=weaponHint();
@@ -1228,6 +1245,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   function fail(msg){backToSetup();$("err").textContent=msg;}
   function go(){
     freshSeed();
+    if(mode==="word") return goWord();
     const items=parse(), info=MODE_INFO[mode];
     if(items.length<2) return fail("Cần ít nhất 2 tên.");
     if(listProblem(items)) return fail("Sửa danh sách ở trên rồi bấm lại nhé.");
@@ -1247,6 +1265,39 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     startTeam(racers,sol);
   }
   $("go").addEventListener("click",go);
+
+  /* ---------- Mode: Quay mất chữ (word) ---------- */
+  // Mỗi chữ cái (theo ký tự người đọc thấy, chữ có dấu tiếng Việt là một chữ) là một ô trên vòng quay; dấu cách không thành ô.
+  // Trúng ô nào thì xoá chữ đó rồi ghép lại. WORD giữ tên gốc và các chữ đã mất để quay tiếp nhiều lượt.
+  const WORD_MAX=30;
+  const graphemes=s=>typeof Intl!=="undefined"&&Intl.Segmenter?[...new Intl.Segmenter("vi",{granularity:"grapheme"}).segment(s)].map(x=>x.segment):Array.from(s);
+  const wordLetters=w=>graphemes(w).map((ch,i)=>({ch,i})).filter(x=>x.ch.trim());
+  let WORD=null; // {orig, cur, removed:[]}
+  const wordIn=$("wordIn");
+  wordIn.value=store.get("dua-ngong-word","Kazey");
+  const wordCount=()=>{const n=wordLetters(wordIn.value.trim()).length;$("wordCount").textContent=n?`${n} chữ`:"";};
+  wordIn.addEventListener("input",()=>{store.set("dua-ngong-word",wordIn.value);WORD=null;$("err").textContent="";wordCount();});
+  wordIn.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go();}});
+  wordCount();
+  function goWord(){
+    const w=wordIn.value.trim().replace(/\s+/g," "), letters=wordLetters(w);
+    if(letters.length<2) return fail("Nhập tên có ít nhất 2 chữ.");
+    if(letters.length>WORD_MAX) return fail(`Tên dài quá, tối đa ${WORD_MAX} chữ.`);
+    $("err").textContent="";
+    if(!WORD||WORD.cur!==w) WORD={orig:w,cur:w,removed:[]};
+    startRing(letters.map((x,k)=>({name:x.ch,idx:x.i,color:SLICE_COLORS[k%SLICE_COLORS.length]})),{letters:true});
+  }
+  // Gọi khi vòng quay dừng: xoá chữ trúng, ghép tên mới, điền lại ô nhập để "Quay tiếp"
+  function wordResult(it){
+    const before=WORD.cur, after=graphemes(before).filter((_,j)=>j!==it.idx).join("").replace(/\s+/g," ").trim();
+    WORD.cur=after; WORD.removed.push(it.name);
+    wordIn.value=after; store.set("dua-ngong-word",after); wordCount();
+    const more=wordLetters(after).length>=2;
+    return {n:wordLetters(before).length,tint:false,label:`✂️ ${before} mất chữ “${it.name}”`,name:after||"(hết chữ)",order:null,
+      again:more?"Quay tiếp":"Hết chữ, nhập tên mới",removeText:null,
+      copy:`✂️ ${before} quay trúng “${it.name}” → ${after}`+(WORD.removed.length>1?`\nTừ ${WORD.orig}, đã mất: ${WORD.removed.join(", ")}`:""),
+      word:{before,after,letter:it.name,orig:WORD.orig,removed:[...WORD.removed]}};
+  }
 
   /* Chia K đội ngẫu nhiên thoả ràng buộc: nhóm "dính" gộp bằng union-find, rồi tìm kiếm
      quay lui có trọng số theo chỗ trống còn lại (không ràng buộc thì mọi cách chia đều như nhau). */
@@ -1309,7 +1360,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
 
   /* ---------- Lịch sử các ván ---------- */
   const HIST_KEY="dua-ngong-history", HIST_MAX=100;
-  const MODE_LABEL={cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",climb:"🐐 Dê Leo Núi",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
+  const MODE_LABEL={word:"✂️ Quay mất chữ",cup:"🏆 Giải đấu",give:"🎁 Đua Ngỗng",climb:"🐐 Dê Leo Núi",team:"⚔️ Chia team",survive:"💥 Sinh tồn",egg:"🥚 Trứng nở",pass:"🎟️ Vòng quay may mắn"};
   function loadHistory(){try{const h=JSON.parse(store.get(HIST_KEY,"[]"));return Array.isArray(h)?h:[];}catch(e){return [];}}
   function addHistory(e){const h=loadHistory();h.unshift({t:Date.now(),...e});store.set(HIST_KEY,JSON.stringify(h.slice(0,HIST_MAX)));}
   const fmtTime=t=>{const d=new Date(t),p=x=>String(x).padStart(2,"0");return `${p(d.getHours())}:${p(d.getMinutes())} ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;};
@@ -1861,6 +1912,15 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         fields:fields.concat([{name:"​",value:pickOne(["*Chúc các đội chiến vui!* ⚔️","*Thua thì đừng đổ tại con "+noun()+" nha* 😆","*Đội nào thắng nhớ khao cả guild* 🍗"])}])};
     }
     if(!RES) return null;
+    if(mode==="word"&&RES.word){
+      const w=RES.word, L=dcEsc(w.letter);
+      const fields=[{name:"✏️ Trước",value:`**${dcEsc(w.before)}**`,inline:true},{name:"✂️ Mất chữ",value:`**${L}**`,inline:true},{name:"✨ Còn lại",value:`**${dcEsc(w.after)||"(hết chữ)"}**`,inline:true}];
+      if(w.removed.length>1) fields.push({name:"📜 Từ tên gốc",value:dcCut(`${dcEsc(w.orig)} → ${dcEsc(w.after)} · đã mất: ${w.removed.map(dcEsc).join(", ")}`,1024)});
+      return {...base,title:"🌕 LUNAR CAPITAL · QUAY MẤT CHỮ",color:0xF59E6B,fields,
+        description:pickOne([`Con ${noun()} chạy một vòng quanh **${dcEsc(w.before)}** rồi dừng trước chữ **${L}**. Chữ đó bay màu ✂️`,
+          `Vòng quay đã phán: **${dcEsc(w.before)}** mất chữ **${L}**, từ nay gọi là **${dcEsc(w.after)}** 😆`,
+          `Một chữ ra đi, một cái tên mới ra đời: **${dcEsc(w.after)}** 🌙`])};
+    }
     const name=dcEsc(RES.name), wid=dcIds().get(RES.name), tag=wid?` · <@${wid}>`:""; // mention trong embed chỉ hiện tên, không ping
     if(mode==="pass"&&R){
       const pct=Math.round((R.power||0)*100), laps=R.laps||0, prize=dcEsc(prizeName());
@@ -1892,7 +1952,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   // Chia team không có người trúng nên không ping ai. allowed_mentions chỉ mở đúng các ID này.
   function dcPing(){
     const none={allowed_mentions:{parse:[]}};
-    if(mode==="team"||!RES) return none;
+    if(mode==="team"||mode==="word"||!RES) return none;
     const id=dcIds().get(RES.name), role=dcRole();
     if(!id&&!role) return none;
     const who=id?`<@${id}>`:`**${dcEsc(RES.name)}**`;
@@ -2245,14 +2305,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
   </svg>`;
   const SLICE_COLORS=["#FFD166","#06D6A0","#4CC9F0","#F4A261","#C77DFF","#FF8FAB","#90BE6D","#F9C74F"];
   let R=null;
-  function startRing(items){
+  function startRing(items,opt={}){ // opt.letters: Quay mất chữ (mỗi ô một chữ cái)
     const my=++session; show(scr.ring);
     const host=$("ring"); host.innerHTML=""; host.className="ring pay";
     const S=host.clientWidth, c=S/2, k=items.length, seg=2*Math.PI/k;
     const P=(a,r)=>[c+r*Math.sin(a),c-r*Math.cos(a)];
     const gh=Math.round(clamp(S*.1,30,62)*(k>=15?.85:1)), gw=gh*1.25; // vòng to trên desktop thì con thú to theo
     // Ít người: ghế ngồi quanh sân. Đông người (15+): chia lát như vòng quay, con thú chạy trên vành.
-    const slices=k>=15, seats=[];
+    const slices=opt.letters||k>=15, seats=[];
     let track, seatR=0, hubR=0;
     if(!slices){
       seatR=c-Math.max(30,S*.09);
@@ -2275,8 +2335,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         svg.appendChild(path); seats.push(path);
         const mid=a0+seg/2, right=mid<Math.PI; // nửa trái lật chữ lại cho khỏi ngược
         // cả hai nửa đều neo chữ sát vành ngoài (nửa trái đã lật nên neo "start" thay vì "end")
-        const [tx,ty]=P(mid,outer-8);
         const text=document.createElementNS(NS,"text");
+        if(opt.letters){ // chữ cái to, đứng thẳng ở giữa ô
+          const [lx,ly]=P(mid,(outer+inner)/2);
+          text.setAttribute("x",lx); text.setAttribute("y",ly); text.setAttribute("text-anchor","middle"); text.setAttribute("dominant-baseline","central");
+          text.setAttribute("font-size",clamp(Math.min((outer-inner)*.5,((outer+inner)/2)*seg*.62),14,64).toFixed(1)); text.setAttribute("class","letter");
+          text.textContent=it.name; svg.appendChild(text); return;
+        }
+        const [tx,ty]=P(mid,outer-8);
         text.setAttribute("x",tx); text.setAttribute("y",ty); text.setAttribute("text-anchor",right?"end":"start"); text.setAttribute("dominant-baseline","middle");
         text.setAttribute("font-size",fs.toFixed(1));
         text.setAttribute("transform",`rotate(${mid*180/Math.PI-90+(right?0:180)} ${tx} ${ty})`);
@@ -2300,13 +2366,14 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     const pw=document.createElement("div"); pw.className="power"; host.appendChild(pw);
     if(hubR) pw.style.width=Math.round(2*hubR-10)+"px"; // vòng lực nằm sát trong mép tâm vòng quay
     const tok=document.createElement("button"); tok.className="ring-token armed"; tok.type="button";
-    tok.setAttribute("aria-label",`Nhấn giữ ${prizeName()} để lấy đà, thả ra để quay`);
+    const tokLabel=opt.letters?"Quay chữ":prizeName();
+    tok.setAttribute("aria-label",`Nhấn giữ ${tokLabel} để lấy đà, thả ra để quay`);
     tok.innerHTML=TOKEN_SVG+"<span></span>";
-    tok.querySelector("span").textContent=prizeName(); host.appendChild(tok);
+    tok.querySelector("span").textContent=tokLabel; host.appendChild(tok);
     // danh sách được bốc; người thắng chỉ được bốc lúc thả tay (xem spinRing)
     let cands=items.map((it,i)=>i);
     const lastWin=store.get("dua-ngong-lastwin","");
-    if(avoidLast&&lastWin){
+    if(avoidLast&&lastWin&&!opt.letters){
       const f=cands.filter(i=>items[i].name!==lastWin);
       if(f.length&&f.length<cands.length){cands=f; seats[items.findIndex(it=>it.name===lastWin)].classList.add("skip");}
     }
@@ -2315,10 +2382,10 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     makeGoose(runner,()=>R.speed>5?"flap":R.speed>1.4?"run":R.speed>.15?"walk":"idle");
     runner.el.style.width=gw+"px"; runner.el.style.height=gh+"px";
     host.appendChild(runner.el);
-    R={my,items,k,seg,track,P,gw,gh,goose:runner,seats,slices,cands,skipped:cands.length<k?lastWin:"",a:a0,a0,targetA:0,total:0,TT:1,t:0,speed:0,win:-1,cur:-1,done:false,
+    R={my,items,k,seg,track,P,gw,gh,goose:runner,seats,slices,cands,skipped:cands.length<k?lastWin:"",letters:!!opt.letters,a:a0,a0,targetA:0,total:0,TT:1,t:0,speed:0,win:-1,cur:-1,done:false,
        tok,pw,holding:false,holdT:0,pressure:0,power:0,spun:false};
     placeRing(R.a,track);
-    $("status5").textContent=`Nhấn giữ ${prizeName()} để lấy đà, thả tay là quay. Giữ càng lâu quay càng dữ.`;
+    $("status5").textContent=opt.letters?`Nhấn giữ lệnh bài để lấy đà, thả tay là quay. Con ${noun()} dừng ở chữ nào, chữ đó bay màu.`:`Nhấn giữ ${prizeName()} để lấy đà, thả tay là quay. Giữ càng lâu quay càng dữ.`;
     // Nhấn giữ lấy đà: giữ ~2 giây là đầy lực. Máy có cảm biến lực nhấn thì nhấn mạnh cũng tính.
     const press=e=>{ if(R.spun||R.holding) return; R.holding=true; R.holdT=0; R.pressure=0; if(e&&e.pointerId!=null) try{tok.setPointerCapture(e.pointerId);}catch(_){} say(runner,line(runner,"charge"),9); };
     const move=e=>{ if(R.holding&&e.pressure>0&&e.pressure!==.5) R.pressure=Math.max(R.pressure,e.pressure); };
@@ -2357,7 +2424,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     R.pw.classList.remove("on"); R.pw.classList.add("spent");
     R.goose.bubble.classList.remove("on");
     honk(1+p*.4);
-    $("status5").textContent=`Lực ${Math.round(p*100)}% · ${laps} vòng. Con ${noun()} đang chọn chủ nhân ${prizeName()}…`;
+    $("status5").textContent=`Lực ${Math.round(p*100)}% · ${laps} vòng. Con ${noun()} đang ${R.letters?"chọn chữ để xoá":"chọn chủ nhân "+prizeName()}…`;
     loop(R.my,tickRing);
   }
   function placeRing(a,r){
@@ -2382,8 +2449,8 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
         R.seats.forEach(s=>s.classList.remove("near","on")); R.seats[R.win].classList.add(R.slices?"win":"hit");
         say(R.goose,line(R.goose,"passWin"),2.2);
         honk(1.2); honk(1.2,.25);
-        $("status5").textContent=`🎟️ ${it.name} ẵm ${prizeName()}!`;
-        store.set("dua-ngong-lastwin",it.name);
+        if(R.letters) $("status5").textContent=`✂️ Trúng chữ “${it.name}”!`;
+        else{$("status5").textContent=`🎟️ ${it.name} ẵm ${prizeName()}!`; store.set("dua-ngong-lastwin",it.name);}
       }
       return;
     }
@@ -2392,6 +2459,7 @@ button.tcard:hover{background:rgba(242,154,46,.14)}
     tickBubble(R.goose,dt);
     if(since>1.6){
       const it=R.items[R.win];
+      if(R.letters){showResult({...wordResult(it),sp:R.goose.sp,color:it.color,num:0});return false;}
       showResult({n:R.k,tint:false,label:`🎟️ Ẵm ${prizeName()}`,name:it.name,sp:R.goose.sp,color:it.color,num:0,order:null,again:"Tranh lại",
         removeText:R.k>2?`Loại "${it.name}", tranh tiếp`:null,copy:`🎟️ ${it.name} ẵm ${prizeName()}! (thú chọn ngẫu nhiên)`});
       return false;
