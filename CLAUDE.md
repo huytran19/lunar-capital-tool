@@ -76,6 +76,7 @@ Thứ tự nút trên màn chuẩn bị: Đua Ngỗng, Dê Leo Núi, Vòng quay 
 - Repo public `huytran19/lunar-capital-tool` (đổi tên từ `dua-ngong` ngày 2026-10-04, link /dua-ngong/ cũ đã bỏ), GitHub Pages từ branch `main`, thư mục root: https://huytran19.github.io/lunar-capital-tool/
 - Push lên `main` là Pages tự build lại (khoảng 1 phút).
 - Link riêng từng mode: `/giveaway/` (Đua Ngỗng), `/de-leo-nui/` (Dê Leo Núi), `/vong-quay/` (Vòng quay may mắn), `/chia-team/`, `/sinh-ton/`, `/trung-no/`, `/giai-dau/`. `/tranh-pass/` là link cũ, giữ lại để link đã gửi vẫn chạy. Mỗi thư mục chỉ có một `index.html` nhỏ chứa thẻ Open Graph (thẻ xem trước khi dán vào Discord) rồi chuyển về `../?mode=<mode>`. Game đọc `?mode=` lúc mở và cập nhật lại URL khi đổi mode.
+- Hướng dẫn cho team CSKH (quay thưởng + ping qua `/danhsach` và webhook): `/huong-dan-cskh/` (trang tĩnh, có `noindex`; ảnh chụp tool thật ở `img/` với tên/ID mẫu, tin Discord là hình vẽ minh hoạ). Bản nháp cũng là artifact https://claude.ai/artifact/M2iBYme2wkzwn7n9kPL8v3. Đổi giao diện tool nhiều thì chụp lại ảnh. **Không bao giờ ghi Webhook URL vào trang này.**
 - Ảnh xem trước 1200x630 ở `og/` (`home.jpg` cho trang chính, `<mode>.jpg` cho từng link). Tạo bằng Playwright: chụp khu vực chơi giữa ván rồi ghép với tiêu đề. Đổi giao diện nhiều thì chụp lại.
 - Discord lưu thẻ xem trước khá lâu, sửa ảnh xong có thể phải chờ hoặc thêm `?v=2` vào link.
 
