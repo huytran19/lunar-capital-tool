@@ -1,11 +1,46 @@
 /* Danh sach gift code Where Winds Meet - con han
  * Nguon: https://codes.yar.gg (danh sach do cong dong cap nhat)
- * Chup luc: 2026-11-15
+ * Chup luc: 2026-11-16
  */
 window.WWM_CODES = {
-  updated: '2026-11-15',
+  updated: '2026-11-16',
   source: { name: 'codes.yar.gg', url: 'https://codes.yar.gg/' },
   codes: [
+    { code: "ANNCXFTTD4T", date: "11/16" },
+    { code: "ANNFM8D776A", date: "11/16" },
+    { code: "ANNQ3NTEWQ8", date: "11/16" },
+    { code: "ANNPTKR4DEE", date: "11/16" },
+    { code: "ANN7PFW7HXJ", date: "11/16" },
+    { code: "ANNFQYEXW3T", date: "11/16" },
+    { code: "ANNME3WKTFF", date: "11/16" },
+    { code: "ANNR7TCN7CF", date: "11/16" },
+    { code: "ANNKRCCAPTP", date: "11/16" },
+    { code: "ANNK4TMYHRY", date: "11/16" },
+    { code: "ANNEH4ACHH3", date: "11/16" },
+    { code: "WWM1114PARTY", date: "11/16" },
+    { code: "ANNKQ7Q7H68", date: "11/15" },
+    { code: "ANN3RRDK3TW", date: "11/15" },
+    { code: "ANNCCHCYFXA", date: "11/15" },
+    { code: "ANN3CJ7AENH", date: "11/15" },
+    { code: "ANNTP6FAE4K", date: "11/15" },
+    { code: "ANNYCPQTDX3", date: "11/15" },
+    { code: "ANNKFAFR87D", date: "11/15" },
+    { code: "ANNDQMQTHWD", date: "11/15" },
+    { code: "ANNMX64J3QF", date: "11/15" },
+    { code: "ANN47J6J7RR", date: "11/15" },
+    { code: "ANND4F3KHDM", date: "11/15" },
+    { code: "ANNF6TH8X4P", date: "11/15" },
+    { code: "ANNWTTDF8JW", date: "11/15" },
+    { code: "ANNH34RY4DK", date: "11/15" },
+    { code: "ANNNXK38RMC", date: "11/15" },
+    { code: "ANN84RHMTEM", date: "11/15" },
+    { code: "ANNHJDT4KX7", date: "11/15" },
+    { code: "ANNME44KMT8", date: "11/15" },
+    { code: "ANNNMH8WRTM", date: "11/15" },
+    { code: "ANNP8P6Y3XF", date: "11/15" },
+    { code: "ANNW7HJ86JA", date: "11/15" },
+    { code: "ANNYNDAHPXT", date: "11/15" },
+    { code: "ANNQNREWQWQ", date: "11/15" },
     { code: "ANNMN7CT3XD", date: "11/15" },
     { code: "ANN8QFMKR3K", date: "11/15" },
     { code: "ANNJCYMNNF6", date: "11/15" },
@@ -101,9 +136,7 @@ window.WWM_CODES = {
     { code: "WWMXATM3", date: "9/30" },
     { code: "WWMR3DD1T09", date: "9/14" },
     { code: "WWM20261114", date: "8/06" },
-    { code: "TF37WR876K", date: "7/09" },
     { code: "WWMXATM0501", date: "6/29" },
-    { code: "LIANGZHOU0402", date: "6/29" },
-    { code: "TF33HXJMJC", date: "6/29" }
+    { code: "LIANGZHOU0402", date: "6/29" }
   ]
 };
